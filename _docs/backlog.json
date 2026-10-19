@@ -258,7 +258,11 @@
         "publication": "pending_publish",
         "scope_gate": "M08 domain CRUD only; M09 reporting blocked until independent M08 QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-3-M08-qa.md",
+      "implementation_commit": "bdb554b",
+      "qa_commit": "414bf2c",
+      "process_note": "Independent full75-test PASS includes refined contract input bounds; no external publication or closure implied."
     },
     {
       "local_id": "M09",
@@ -285,11 +289,12 @@
         "M08"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "reviewer": "PM architecture role",
         "date": "2026-10-19",
-        "prerequisites": "M08 independent QA PASS required before implementation.",
-        "publication": "pending_publish"
+        "prerequisites": "M08 independent QA PASS: engineer bdb554b, QA414bf2c, _docs/evidence/iteration-3-M08-qa.md.",
+        "publication": "pending_publish",
+        "scope_gate": "M09 reporting only; M10 ORM/migrations remains blocked until M09 independent QA PASS."
       },
       "qa_status": "not_run"
     },
@@ -315,8 +320,10 @@
         "M09"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists.",
+        "prerequisites": "M09 independent QA PASS required.",
+        "scope_gate": "Models and Alembic schema only; M11 repository replacement/restart verification is separate and requires M10 independent QA PASS."
       },
       "qa_status": "not_run"
     },
@@ -342,8 +349,10 @@
         "M10"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists.",
+        "prerequisites": "M10 independent QA PASS required.",
+        "scope_gate": "SQLite repository substitution, parity and actual process restart evidence; no frontend integration until M11 independent QA PASS."
       },
       "qa_status": "not_run"
     },

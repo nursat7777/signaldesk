@@ -105,6 +105,8 @@ def create_app(settings=None, repository=None):
         return response
     from .domain import router
     app.include_router(router())
+    from .reporting import router as report_router
+    app.include_router(report_router())
     return app
 
 
