@@ -56,7 +56,7 @@ The five required stages were implemented and independently checked in order: mo
 
 Google provider validation is covered by locally signed token and mocked-provider tests. A real Google consent/login handshake remains unverified because credentials were not supplied. UI interactions ran in jsdom with actual HTTP backend calls; browser visual/responsive/CORS behavior was not verified. No hosted deployment is claimed.
 
-GitHub connection/publication remains blocked: no remote repository URL, pushed commits, published issues or external closures are claimed. `_docs/backlog.json` contains honest local issue staging and independent QA history, not proof of GitHub publication. Delivery is incomplete until authorized GitHub access is connected, the repository/issues are published and reviewed MVP/bug issues are closed externally. Deferred post-MVP issues remain open.
+GitHub sign-in as nursat7777 and creation of the private repository https://github.com/nursat7777/signaldesk were verified on 2026-10-19. Browser source-upload commit was then rejected by the browser URL security policy; no successful remote source commit or push is claimed. Issues and labels remain unpublished. `_docs/backlog.json` contains honest local staging and independent QA history. External delivery is incomplete. See `_docs/delivery.md` for recovery commands; deferred post-MVP work stays open.
 
 ## Documentation
 
