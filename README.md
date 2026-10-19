@@ -6,7 +6,7 @@ React/TypeScript/Vite frontend, FastAPI REST API, SQLAlchemy ORM, Alembic migrat
 
 ## Run locally
 
-Verified runtime: Python 3.12 and Node.js 22 with npm. Commands below use macOS/Linux and run from the repository root. `make` is optional: its targets contain the exact underlying commands. Install Python/Node before starting.
+Verified local runtime: Python 3.12.14 and Node.js 24.19.0 with npm. CI is configured to target Node.js 22; that remote CI target has not been executed. Commands below use macOS/Linux and run from the repository root. `make` is optional: its targets contain the exact underlying commands. Install Python/Node before starting.
 
 ```bash
 make setup
