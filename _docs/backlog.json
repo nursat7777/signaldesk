@@ -180,7 +180,10 @@
         "status": "groomed_locally",
         "note": "Ready when dependencies pass; no external issue or QA approval exists."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-2-qa.md",
+      "implementation_commit": "aee0377",
+      "process_note": "Maintained OpenAPI validated and independently reviewed; no real issue publication or closure implied."
     },
     {
       "local_id": "M07",
@@ -192,21 +195,28 @@
         "mvp"
       ],
       "goal": "Enforce identity and current access server-side.",
-      "description": "Implement REST foundation, repository interface, allowlist administration and real configured OAuth flow.",
+      "description": "Implement only identity/session, health and OAuth contract operations using in-memory identity/session/OAuth-state repositories. Bootstrap administrator from configuration, no public signup. Keep client/campaign/daily CRUD for M08 and reporting for M09. Entry prerequisite M06 has independent local QA PASS at aee0377. Frontend source and frozen OpenAPI remain unchanged.",
       "acceptance_criteria": [
-        "Configured Google code flow validates state, nonce and verified identity.",
-        "Server sessions expire/revoke and every request rechecks enabled role/assignment.",
-        "Missing configuration is explicit; no production test-login bypass.",
-        "Actual auth and permission tests run; real Google verification limitations are recorded."
+        "Public GET health and auth/status match maintained contract; missing Google configuration returns configured:false and login start503.",
+        "GET /me without valid nonexpired opaque session returns401; disabled/revoked session is rejected on its next request.",
+        "Configured Google start generates one-time browser-bound state and nonce; callback rejects missing, mismatched, expired, replayed or cross-browser state before linking identity.",
+        "Provider identity verifies signature/issuer/audience/expiry/nonce/email_verified; only approved enabled normalized email can link. Never create unapproved account.",
+        "Successful callback rotates server session and sets HttpOnly SameSite=Lax cookie; HTTPS production Secure behavior configured. Fixed frontend redirect only.",
+        "GET /me returns exact User plus X-CSRF-Token; authenticated logout validates token+trusted Origin, revokes session and clears cookie.",
+        "Actual isolated provider/session tests run; live Google handshake remains explicitly unverified without credentials. No production test-login route exists."
       ],
       "out_of_scope": "Features outside the approved MVP.",
-      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "constraints": "Implement only M07 endpoints and minimum in-memory auth repository. No domain CRUD/reporting or SQLite yet. Contract aee0377 frozen unless genuine bug; no provider secrets or bypasses in git. Use isolated test dependency injection rather than production fake identities.",
       "dependencies": [
         "M06"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_ready",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "prerequisites": "M06 local independent QA PASS; contract commit aee0377.",
+        "scope_gate": "M07 only; await independent QA before M08.",
+        "publication": "pending_publish"
       },
       "qa_status": "not_run"
     },
@@ -220,11 +230,16 @@
         "mvp"
       ],
       "goal": "Enforce campaign and metrics rules independently of UI.",
-      "description": "Implement client/user/assignment/campaign and daily operations against the contract.",
+      "description": "After M07 independent QA PASS, implement approved user/client/assignment/campaign and daily endpoints against in-memory repositories. Validate current authenticated role and current assignment for every call. Keep report aggregation for M09 and ORM/SQLite for iteration4.",
       "acceptance_criteria": [
-        "Admin/assigned marketer/client access matrix is tested directly.",
-        "Unique dates, version conflicts, archive history and currency immutability are tested.",
-        "Numbers and future dates validate with documented errors."
+        "Admin creates/updates approved accounts and clients; marketer/client requests to admin mutations return403.",
+        "Merged user edit enforces valid client association, clears irrelevant associations/grants on role transition, rejects self-account modification and preserves stored state on invalid input.",
+        "Multiple marketer assignments are atomic and reference existing clients; revocation removes access on next request.",
+        "Assigned marketer reads/writes own clients; unassigned marketer and client viewer cross-client read/write requests fail; client viewer is always read-only.",
+        "Campaign fixed client/channel cannot be patched; archive retains history, parent-archived client denies campaign writes, and archived campaign denies daily writes.",
+        "All six metrics required; counts nonnegative integers, money exact two-decimal strings, dates valid and not future in Almaty, zeros valid, no unsupported count inequalities.",
+        "One campaign/date record: create without version succeeds, duplicate create/stale update/missing-record update version returns409; valid version increments atomically.",
+        "Client currency update after metrics fails409; invalid mutations preserve original records. Execute direct API matrix and edge-case tests."
       ],
       "out_of_scope": "Features outside the approved MVP.",
       "constraints": "Follow approved plan, current iteration and role authorization.",
@@ -232,8 +247,11 @@
         "M07"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "prerequisites": "M07 independent QA PASS required before implementation.",
+        "publication": "pending_publish"
       },
       "qa_status": "not_run"
     },
@@ -247,11 +265,14 @@
         "mvp"
       ],
       "goal": "Provide accurate authorized reporting.",
-      "description": "Aggregate base metrics and return daily/channel report slices.",
+      "description": "After M08 independent QA PASS, implement the frozen singular client report endpoint and verify complete in-memory backend contract coverage. Aggregate only currently authorized client records; no frontend adapter or SQLite changes.",
       "acceptance_criteria": [
-        "Inclusive dates, empty states and ratio calculations have actual tests.",
-        "Cross-client unauthorized report calls fail.",
-        "Run API integration suite and check maintained contract coverage."
+        "Report exact fields match contract with inclusive from/to valid Almaty dates; reversed or malformed range returns422.",
+        "Sum base metrics before calculating CTR, CPC, CPL, ROAS; ratio denominators zero produce null, not Infinity or misleading0.",
+        "Return fixed two-decimal money strings and number/null ratios, never sum clients or mixed currencies.",
+        "No-data totals are zero with null ratios and empty daily/channel slices; missing dates omitted instead of fabricated activity.",
+        "Archived historical records remain in reports; admin and assigned marketer/client viewer own-client permission matrix tested, unassigned/cross-client denied.",
+        "Run actual complete in-memory API regression suite plus maintained schema operation/response coverage checks and record commands/results/limits."
       ],
       "out_of_scope": "Features outside the approved MVP.",
       "constraints": "Follow approved plan, current iteration and role authorization.",
@@ -259,8 +280,11 @@
         "M08"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "prerequisites": "M08 independent QA PASS required before implementation.",
+        "publication": "pending_publish"
       },
       "qa_status": "not_run"
     },
