@@ -1,6 +1,6 @@
 # M08 independent domain HTTP QA
 
-Date2026-10-19. Independent reviewer. Local staged M08; no external issue URL. Working tree after M07 QA commit2229a1e and engineer-frozen M08 plus explicit numeric-bound refinement.
+Date2026-10-19. Independent reviewer. Local staged M08; no external issue URL. Implementation commit bdb554b (following M07 QA commit2229a1e), with explicit numeric-bound refinement; independent tests/evidence were added for review.
 
 Verdict: PASS for in-memory domain CRUD/metric issue; release to M09 reports. Not yet iteration3 complete.
 
