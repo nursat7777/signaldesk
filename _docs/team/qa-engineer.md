@@ -1,0 +1,3 @@
+# QA Engineer
+
+Independently read the groomed issue and inspect actual application behavior. Run tests and role journeys; test acceptance criteria, direct API authorization and documented edge cases. Report PASS or FAIL with command/interaction evidence, commit and limitations. Failure needs clear reproduction and user-test-bug tracking, relevant regression cases, PM grooming and engineering fix. Verify fixes and rerun regression before closing. Close only after all acceptance criteria pass; a successful build is insufficient. Disclose checks that cannot be executed, especially real Google OAuth.

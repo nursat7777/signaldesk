@@ -1,0 +1,436 @@
+{
+  "status": "local_staging_only_pending_github_publication",
+  "labels": [
+    "mvp",
+    "post-mvp",
+    "user-test-bug"
+  ],
+  "issues": [
+    {
+      "local_id": "M01",
+      "title": "Document approved scope, architecture and delivery gates",
+      "iteration": 0,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Make scope and workflow reviewable.",
+      "description": "Commit authentic transcript, approved plan, stack decision and role documents.",
+      "acceptance_criteria": [
+        "All required initial markdown exists.",
+        "Approval is recorded without invented answers.",
+        "Stage and GitHub publication states are explicit."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M02",
+      "title": "Build dark bilingual workspace with mock role navigation",
+      "iteration": 1,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Demonstrate principal screens before backend.",
+      "description": "Implement typed service interface and centralized mockService with administrator, marketer and client fixtures.",
+      "acceptance_criteria": [
+        "UI runs with mockService and no real backend.",
+        "Role-specific navigation and assigned-client visibility work.",
+        "EN/RU controls and empty/loading/error states are interactive."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M01"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M03",
+      "title": "Implement mock administrator client and access management",
+      "iteration": 1,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Let administrator configure agency access.",
+      "description": "Build client, approved-user and marketer-assignment workflows with mocked persistence.",
+      "acceptance_criteria": [
+        "Admin creates/archives clients and approves/revokes users.",
+        "Multiple marketers can be assigned to a client.",
+        "Client viewer maps to one client; other roles cannot access admin mutations."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M02"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M04",
+      "title": "Implement mock campaigns and versioned daily entry",
+      "iteration": 1,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Let assigned marketers maintain results.",
+      "description": "Build campaign creation/archive and daily metrics forms with one row per campaign/date.",
+      "acceptance_criteria": [
+        "All six metrics validate and explicit zeros are allowed.",
+        "Existing date loads existing record; no duplicate is created.",
+        "Stale updates display conflict and future/negative inputs fail."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M02"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M05",
+      "title": "Implement mock reports and verify frontend journeys",
+      "iteration": 1,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Show useful client performance.",
+      "description": "Add inclusive dates, base totals, trends and fixed channel comparison.",
+      "acceptance_criteria": [
+        "CTR/CPC/CPL/ROAS derive from summed totals and zero denominators show unavailable.",
+        "Currencies remain separate and missing data is explicit.",
+        "Run role journeys, daily edit, filters and RU/EN interaction checks."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M03",
+        "M04"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M06",
+      "title": "Specify and validate OpenAPI REST contract",
+      "iteration": 2,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Freeze a contract supporting demonstrated frontend operations.",
+      "description": "Define authentication, user/client/assignment/campaign/daily/report requests, responses and errors.",
+      "acceptance_criteria": [
+        "Maintained _docs/openapi.yml passes an actual validator.",
+        "Contract covers mock service operations and 401/403/404/409/422 cases.",
+        "Decimal amounts, versions, dates and inclusive filters are explicit."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M05"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M07",
+      "title": "Implement in-memory backend and guarded Google sessions",
+      "iteration": 3,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Enforce identity and current access server-side.",
+      "description": "Implement REST foundation, repository interface, allowlist administration and real configured OAuth flow.",
+      "acceptance_criteria": [
+        "Configured Google code flow validates state, nonce and verified identity.",
+        "Server sessions expire/revoke and every request rechecks enabled role/assignment.",
+        "Missing configuration is explicit; no production test-login bypass.",
+        "Actual auth and permission tests run; real Google verification limitations are recorded."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M06"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M08",
+      "title": "Implement in-memory domain CRUD and daily concurrency",
+      "iteration": 3,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Enforce campaign and metrics rules independently of UI.",
+      "description": "Implement client/user/assignment/campaign and daily operations against the contract.",
+      "acceptance_criteria": [
+        "Admin/assigned marketer/client access matrix is tested directly.",
+        "Unique dates, version conflicts, archive history and currency immutability are tested.",
+        "Numbers and future dates validate with documented errors."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M07"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M09",
+      "title": "Implement in-memory reports and run backend suite",
+      "iteration": 3,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Provide accurate authorized reporting.",
+      "description": "Aggregate base metrics and return daily/channel report slices.",
+      "acceptance_criteria": [
+        "Inclusive dates, empty states and ratio calculations have actual tests.",
+        "Cross-client unauthorized report calls fail.",
+        "Run API integration suite and check maintained contract coverage."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M08"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M10",
+      "title": "Add SQLAlchemy models and Alembic migrations",
+      "iteration": 4,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Persist domain data with a portable ORM.",
+      "description": "Create models, relations, constraints and migration-managed SQLite schema.",
+      "acceptance_criteria": [
+        "Fresh migration creates all required domain/session tables.",
+        "Campaign/date and assignment uniqueness enforced in database.",
+        "Money uses fixed integer minor units; file/config/secrets excluded from git."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M09"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M11",
+      "title": "Replace repositories with SQLite and verify restart persistence",
+      "iteration": 4,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Keep accepted data after process restart.",
+      "description": "Implement SQLAlchemy repositories retaining contract and domain behavior.",
+      "acceptance_criteria": [
+        "Repository parity and SQLite API regression checks run.",
+        "Start backend, write data, stop and restart process, then read same data from same file.",
+        "Conflicting updates and transaction rollback remain correct."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M10"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M12",
+      "title": "Connect real frontend API adapter and session states",
+      "iteration": 5,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Use persisted backend from running browser.",
+      "description": "Replace mockService at runtime with real HTTP service and cookie sessions.",
+      "acceptance_criteria": [
+        "Principal screens use backend data and failures are visible.",
+        "Real account setup requirements and login/logout states are clear.",
+        "UI handles revoked access, duplicate-date editing and 409 conflicts."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M11"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M13",
+      "title": "Verify full user journeys and regressions",
+      "iteration": 5,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Prove integrated behavior by running it.",
+      "description": "QA executes admin setup, marketer daily entry and client report journeys with evidence.",
+      "acceptance_criteria": [
+        "Run frontend interaction, backend, contract and integrated workflow checks.",
+        "Verify direct forbidden requests, RU/EN, responsive layout and persistence.",
+        "Every discovered defect gets user-test-bug issue and verified regression fix.",
+        "Independent QA records PASS/FAIL and unresolved Google/deployment limitations honestly."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M12"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "M14",
+      "title": "Finalize setup docs and GitHub delivery audit",
+      "iteration": 5,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "mvp"
+      ],
+      "goal": "Deliver reproducible source and truthful evidence.",
+      "description": "Update README with exact verified commands, publish documentation and audit issue lifecycle.",
+      "acceptance_criteria": [
+        "Required docs and authentic transcript are committed and pushed.",
+        "All published MVP and user-test-bug issues have QA PASS before closure.",
+        "Post-MVP remains open; repository URL and actual test results provided.",
+        "Any OAuth/hosting/connection blocker is clearly identified."
+      ],
+      "out_of_scope": "Features outside the approved MVP.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [
+        "M13"
+      ],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "P01",
+      "title": "Import advertising platforms and CSV data",
+      "iteration": null,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "post-mvp"
+      ],
+      "goal": "Reduce manual entry after MVP.",
+      "description": "Design platform integrations and CSV imports only after core delivery.",
+      "acceptance_criteria": [
+        "Define credentials, mapping, duplicate and reconciliation policies before implementation."
+      ],
+      "out_of_scope": "Current MVP delivery.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    },
+    {
+      "local_id": "P02",
+      "title": "Add event attribution and scheduled report exports",
+      "iteration": null,
+      "publication_status": "pending_publish",
+      "github_url": null,
+      "labels": [
+        "post-mvp"
+      ],
+      "goal": "Expand analysis and distribution later.",
+      "description": "Explore event ingestion, attribution, PDF/CSV and scheduled reports.",
+      "acceptance_criteria": [
+        "Agree privacy, identity, attribution and delivery semantics before implementation."
+      ],
+      "out_of_scope": "Current MVP delivery.",
+      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "dependencies": [],
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+      },
+      "qa_status": "not_run"
+    }
+  ]
+}

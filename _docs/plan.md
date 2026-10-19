@@ -1,6 +1,6 @@
 # Agency advertising analytics — specification for approval
 
-Status: Phase 0 complete; this final specification has not yet been approved. No application code, repository or issues have been created. Working description only; product name remains undecided.
+Status: Approved by the user on 2026-10-19: “да давай сделать и не забудь зайти в мой гит”. Confirmed and proposed completion details below are accepted scope. Working name: SignalDesk. Implementation and GitHub actions require genuine evidence.
 
 ## Concept and problem
 A full-stack web application for one advertising agency to maintain daily advertising performance for several clients, compare channels, and share interactive reports. Inspired by the user's reference to Cometly. This MVP reports manually entered totals; it does not track visitors or perform event-level attribution.
@@ -78,7 +78,7 @@ Use the first article's specification, GitHub backlog and PM/engineer/independen
 4. ORM, migrations and SQLite repository; verify persistence across process restart.
 5. Replace mockService with real API client; test full user journeys.
 
-After specification approval, compare stacks and explain the chosen architecture before implementation. No stack has been agreed yet.
+Chosen implementation: React/TypeScript/Vite + FastAPI + SQLAlchemy/Alembic + SQLite; comparison and architecture are recorded in architecture.md.
 
 ## Documentation and GitHub
 Required: AGENTS.md, CLAUDE.md, README.md; _docs/plan.md, process.md, architecture.md, design-system.md, testing-guidelines.md, task-template.md, openapi.yml, chat-brainstorm.md; _docs/team/{pm,software-engineer,qa-engineer,design-agent}.md. Keep root chat-brainstorm.md as requested and an identical _docs copy.
@@ -97,4 +97,4 @@ GitHub Issues become the canonical backlog, labeled mvp, post-mvp or user-test-b
 - Completion requires pushed documentation/code and all mvp and user-test-bug issues closed after QA approval. Deferred post-mvp issues remain open.
 
 ## Approval gate
-Review confirmed scope and proposed completion details above. Implementation starts after approval of this concrete specification. Latest user instruction: «1 все давай делать проект» selected fixed channels and asked to move forward, before this final specification was presented.
+Final specification approved with the exact user message “да давай сделать и не забудь зайти в мой гит”. This authorizes implementation and GitHub connection/setup within the approved scope.
