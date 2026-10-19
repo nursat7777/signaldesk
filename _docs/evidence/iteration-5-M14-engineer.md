@@ -1,0 +1,7 @@
+# M14 setup/delivery engineer handoff
+
+Prepared runnable root setup/migrate/backend/frontend-dev/demo/build/test/verify Make targets, pytest discovery configuration, updated README and GitHub Actions CI definition. CI action usage checked against official GitHub-maintained README pages on2026-10-19: https://github.com/actions/checkout , https://github.com/actions/setup-python , https://github.com/actions/setup-node ; documented v7 usage selected. CI has contents:read only and does not persist checkout credentials. No remote execution claimed.
+
+README differentiates real Google setup from isolated test-session helpers, actualHTTP/jsdom from browser QA, local issue staging from GitHub publication, and temporary mock demo from persisted authenticated application. Production app remains unchanged.
+
+B03 reproduced by independent QA and PM-groomed before fix: Alembic now loads the .env beside its configuration using override=False, so explicitly exported variables retain precedence. Disposable regression verifies configured path and absence of fallback database. Executed `make verify` exit0:124 Python tests,35 frontend tests across8files,TypeScript/Vite build passed. Raw output m14-make-verify.txt. CI YAML parsed and verified push/PR triggers, contents:read permission and make verify command; no remote workflow execution. Final independent M14 QA pending. No issue closure, external publication, packaging or approval claimed by engineer.

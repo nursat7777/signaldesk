@@ -86,6 +86,47 @@
       ],
       "out_of_scope": "Currency conversion, backend amount storage, new export features.",
       "constraints": "Preserve accessible labels, locale formatting, currency symbol and existing Service data. Update presentation only; no mutation of entered amounts."
+    },
+    {
+      "local_id": "B03",
+      "title": "Alembic ignores project .env DATABASE_URL during setup",
+      "labels": [
+        "user-test-bug"
+      ],
+      "github_url": null,
+      "publication_status": "pending_publish",
+      "status": "pm_groomed_ready_for_engineer",
+      "reproduction_steps": [
+        "Copy migration scripts to disposable project directory; write .env DATABASE_URL pointing to temp configured.sqlite3.",
+        "Write temp Alembic config with different temp fallback.sqlite3 and repository import path.",
+        "Remove DATABASE_URL only from subprocess environment; run python -m alembic -c temporary-config upgrade head."
+      ],
+      "expected": "Migration creates configured.sqlite3 from project .env, matching documented runtime configuration.",
+      "actual": "Migration exits0 but configured.sqlite3 absent and fallback.sqlite3 created.",
+      "impact": "Custom .env DB setup migrates wrong file; runtime can then refuse startup due missing schema.",
+      "qa_test_cases": [
+        "tests/test_qa_setup.py::test_alembic_loads_project_env_database_url"
+      ],
+      "evidence": "2026-10-19 independent targetedpytest exit1: configured database absent after successful migration. Separate filesystem inspection confirms fallback exists. Root .env/defaultDB were never edited.",
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "basis": "QA observed test_qa_setup.py exit1: migration0, configuredDBfalse/fallbackDBtrue in disposable copied project.",
+        "publication": "pending_publish; no external GitHub issue exists."
+      },
+      "qa_verification": "FAIL pending fix",
+      "goal": "Make documented migrations and runtime use the same configured database.",
+      "description": "Observed disposable-project test shows Alembic ignores root .env DATABASE_URL while runtime loads it: migration exits0 creating fallback database, leaving intended database unmigrated. Load root dotenv consistently with runtime while preserving process-environment precedence.",
+      "acceptance_criteria": [
+        "With DATABASE_URL only in disposable project root .env, Alembic upgrade head creates schema in configured database and does not create fallback database.",
+        "Explicit subprocess DATABASE_URL overrides .env value, consistent with runtime configuration.",
+        "Regression test uses temporary copied migration/config/project files and never edits real root .env or user database.",
+        "Run independent setup reproduction and affected migration/backend regression suite; preserve actual commands/results.",
+        "Documented setup instructions migrate the same database runtime opens."
+      ],
+      "out_of_scope": "New runtime features, production deployment and unrelated configuration changes.",
+      "constraints": "Follow runtime dotenv precedence; no secrets in git, no edits to real root.env or user database. Keep migration history and frozen API contract."
     }
   ]
 }

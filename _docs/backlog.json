@@ -443,7 +443,12 @@
         "prerequisites": "M12 independent QA PASS frontend30/build, engineer0721fb6 QA41019f2, _docs/evidence/iteration-5-M12-qa.md.",
         "scope_gate": "M13 full integrated verification only; M14 final setup/CI/delivery remains blocked until independent M13 QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-5-M13-qa.md",
+      "implementation_commit": "ebc54fe",
+      "qa_commit": "18c2464",
+      "checkpoint_tag": "iteration-5-integration-verified",
+      "process_note": "Independent full122Python/35frontend+build PASS with raw logs; actualHTTP+React/jsdom integration, no liveGoogle/browservisual claim. GitHub publication pending."
     },
     {
       "local_id": "M14",
@@ -470,10 +475,10 @@
         "M13"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "note": "Ready when dependencies pass; no external issue or QA approval exists.",
-        "prerequisites": "M13 independent QA PASS required; planning only at present.",
-        "scope_gate": "Final setup/delivery changes gated on M13; no external actions fabricated."
+        "prerequisites": "M13 independent QA PASS122Python/35frontend+build, engineerebc54fe QA18c2464, iteration-5-integration-verified.",
+        "scope_gate": "Final setup/CI/local delivery audit only; no runtime features. Prioritize any confirmed setup B03 with PM/QA lifecycle. External GitHub delivery remains blocked."
       },
       "qa_status": "not_run"
     },
