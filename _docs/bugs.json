@@ -1,0 +1,51 @@
+{
+  "status": "local_staging_only_pending_github_publication",
+  "bugs": [
+    {
+      "local_id": "B01",
+      "title": "Mock user updates permit invalid client viewer associations",
+      "labels": [
+        "user-test-bug"
+      ],
+      "github_url": null,
+      "publication_status": "pending_publish",
+      "status": "verified_fixed_locally_pending_github_publication",
+      "reproduction_steps": [
+        "Create a fresh createMockService().",
+        "As default administrator call updateUser('u2', {role:'client',clientId:null}).",
+        "Alternatively call updateUser('u3', {clientId:'missing'})."
+      ],
+      "expected": "Reject with required validation error; every client viewer maps to an existing client.",
+      "actual": "Both requests resolve and persist invalid client viewer associations.",
+      "impact": "Inconsistent account relationships; client viewer receives no valid client report.",
+      "qa_test_cases": [
+        "qa.service.test.ts: rejects changing marketer to client viewer without valid client association",
+        "qa.service.test.ts: rejects replacing viewer association with nonexistent client"
+      ],
+      "evidence": "2026-10-19 npm test -- --run src/qa.service.test.ts: exit 1, 5 passed and 2 failed; both promise resolved instead of rejecting.",
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "basis": "Observed QA vitest exit 1, 5 passed and 2 failed recorded in bug evidence.",
+        "dependencies": [
+          "QA confirms role-transition regression cases before engineer fix"
+        ],
+        "publication": "pending_publish; no GitHub issue created"
+      },
+      "qa_verification": "PASS 2026-10-19: final npm test exit 0, 16/16 tests including 9 independent service tests; role association rejection, rollback and transition regression verified. No GitHub closure performed.",
+      "goal": "Preserve valid client-viewer association and role-scoped access during account edits.",
+      "description": "The executed isolated mock service tests show client-role edits accept null or nonexistent client references. Validate the merged resulting account before mutation, retain state on failure, and prevent role transitions carrying stale access grants. This is a locally staged genuine bug, not an external GitHub issue.",
+      "acceptance_criteria": [
+        "Client role requires an existing clientId after every create/update, including role-only updates.",
+        "Invalid merged account updates reject without modifying the stored account.",
+        "When changing a marketer to a different role, clientIds is cleared; non-client roles have clientId null.",
+        "Transitioning to marketer starts with no former role client association; explicit admin assignment is required.",
+        "Run QA reproduction cases and role-transition regression cases, then relevant full frontend suite."
+      ],
+      "out_of_scope": "OAuth provider behavior, backend implementation and new account invitation features.",
+      "constraints": "Follow ServiceError validation conventions, admin-only mutation, self-account protections, approved client access boundaries; no production auth bypass. Preserve IDs/email/name/enabled unless explicitly edited.",
+      "fix_evidence": "Frontend engineer added merged-user validation and role-specific association cleanup; QA executed final build exit 0."
+    }
+  ]
+}
