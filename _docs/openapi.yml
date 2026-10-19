@@ -1,0 +1,964 @@
+openapi: 3.1.0
+info:
+  title: SignalDesk REST API
+  version: 1.0.0
+  description: Approved single-agency manual advertising analytics MVP. Cookie sessions,
+    rechecked role/client access, Almaty calendar dates, two-decimal monetary strings.
+    API adapters convert wire money to numeric frontend models without changing service
+    operations. Client viewer reads own reports only; marketer accesses assigned clients;
+    administrator manages all.
+servers:
+- url: http://localhost:8000
+paths:
+  /api/health:
+    get:
+      operationId: health
+      summary: Service health
+      description: Public liveness endpoint; storage reports active repository implementation.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '401': &id001
+          description: No valid current session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403': &id002
+          description: Forbidden role, client access, revoked user, invalid CSRF or
+            Origin.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': &id003
+          description: Resource does not exist or is intentionally hidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409': &id004
+          description: 'Conflict: existing date, stale version, duplicate email, locked
+            currency or other state conflict.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422': &id005
+          description: Invalid request, future/invalid date, malformed range, invalid
+            user association or numeric validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503': &id006
+          description: Required service configuration or OAuth provider unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+  /api/me:
+    get:
+      operationId: getMe
+      summary: Current user
+      description: Current enabled approved session required; client access is rechecked
+        on every request.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          headers:
+            X-CSRF-Token:
+              description: Per-session CSRF token required with configured Origin
+                for state-changing calls. Exposed to frontend CORS.
+              schema: &id007
+                type: string
+                description: 'Stable codes localized by frontend. Known: required,
+                  invalidEmail, duplicateEmail, invalidAssignment, selfDisable, forbidden,
+                  notFound, invalidDate, futureDate, invalidNumber, dateRange, currencyLocked,
+                  archived, conflict, unauthorized, csrf, oauthNotConfigured, oauthFailed.
+                  Unknown failures use localized general error.'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+  /api/auth/status:
+    get:
+      operationId: authStatus
+      summary: Google OAuth configuration status
+      description: Reports whether Google OAuth configuration is present; does not
+        prove a real provider handshake was tested.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthStatus'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security: []
+  /api/auth/google:
+    get:
+      operationId: startGoogleLogin
+      summary: Start Google sign-in
+      description: Creates one-time state and nonce, then redirects to Google authorization.
+        Only approved verified Google email may sign in; no public signup. Missing
+        credentials returns 503. Bind the one-time server OAuth transaction to the
+        initiating browser with an HttpOnly SameSite=Lax state cookie.
+      responses:
+        '302':
+          description: Successful operation.
+          headers:
+            Location:
+              required: true
+              schema:
+                type: string
+                format: uri
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security: []
+  /api/auth/google/callback:
+    get:
+      operationId: googleCallback
+      summary: Complete Google sign-in
+      description: Requires valid one-time stored state and code; Google error or
+        missing parameters fails. Verify signature, issuer, audience, expiration,
+        nonce and verified email. Approved enabled identity only. Rotate opaque server
+        session, set HttpOnly/SameSite=Lax cookie (Secure in HTTPS production), redirect
+        to fixed configured frontend path. Never accept arbitrary return URLs. Require
+        matching browser-bound state cookie and server transaction, consume both on
+        callback, and reject replay or cross-browser state reuse.
+      responses:
+        '302':
+          description: Successful operation.
+          headers:
+            Location:
+              schema: *id007
+            Set-Cookie:
+              schema: *id007
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security: []
+      parameters:
+      - name: code
+        in: query
+        required: false
+        schema: &id008
+          type: string
+          minLength: 1
+      - name: state
+        in: query
+        required: false
+        schema: *id008
+      - name: error
+        in: query
+        required: false
+        schema: *id007
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Revoke current session
+      description: Revoke server session and clear cookie; session, CSRF header and
+        allowed Origin required.
+      responses:
+        '204':
+          description: Successful operation.
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - &id009
+        name: X-CSRF-Token
+        in: header
+        required: true
+        schema: *id008
+      - &id010
+        name: Origin
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uri
+  /api/clients:
+    get:
+      operationId: listClients
+      summary: List accessible clients
+      description: Current enabled approved session required; client access is rechecked
+        on every request.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+    post:
+      operationId: createClient
+      summary: Create client
+      description: Administrator only.
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreate'
+  /api/clients/{clientId}:
+    patch:
+      operationId: updateClient
+      summary: Update or archive client
+      description: Administrator only.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: clientId
+        in: path
+        required: true
+        schema: *id008
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientPatch'
+  /api/clients/{clientId}/campaigns:
+    get:
+      operationId: listCampaigns
+      summary: List accessible client campaigns
+      description: Current enabled approved session required; client access is rechecked
+        on every request.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campaign'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - &id011
+        name: clientId
+        in: path
+        required: true
+        schema: *id008
+    post:
+      operationId: createCampaign
+      summary: Create campaign
+      description: Administrator or marketer assigned to this client. Reject writes
+        to archived client. Client viewers are read-only.
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id011
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreate'
+  /api/campaigns/{campaignId}:
+    patch:
+      operationId: updateCampaign
+      summary: Update or archive campaign
+      description: Administrator or assigned marketer only; fixed client/channel cannot
+        be changed. Archiving retains history. Reject any campaign patch while its
+        parent client is archived (409); restore parent first. An archived campaign
+        may be restored when parent is active.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: campaignId
+        in: path
+        required: true
+        schema: *id008
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignPatch'
+  /api/clients/{clientId}/metrics:
+    get:
+      operationId: listMetrics
+      summary: List daily metrics
+      description: Only accessible client data. Inclusive from/to Almaty calendar
+        dates required; from > to or invalid dates returns 422. Missing days omitted.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Metric'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id011
+      - &id012
+        name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      - &id013
+        name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+  /api/campaigns/{campaignId}/metrics/{date}:
+    put:
+      operationId: saveMetric
+      summary: Create or update one daily metric
+      description: Administrator or assigned marketer only. Upsert by campaign/date
+        with optimistic version required for existing records; returns 200 for create
+        or update. Archived campaign/client cannot receive edits (409). Future Almaty
+        date and invalid amounts/counts rejected (422).
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metric'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: campaignId
+        in: path
+        required: true
+        schema: *id008
+      - name: date
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricWrite'
+  /api/clients/{clientId}/report:
+    get:
+      operationId: getReport
+      summary: Aggregate client report
+      description: Current enabled session and client access required. Inclusive from/to
+        Almaty dates required; malformed or reversed range returns 422. Missing dates
+        omitted. Sum six base metrics, then CTR clicks/impressions*100, CPC spend/clicks,
+        CPL spend/leads, ROAS revenue/spend. Zero denominator yields null. All money
+        belongs to this client currency.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id011
+      - *id012
+      - *id013
+  /api/users:
+    get:
+      operationId: listUsers
+      summary: List approved accounts
+      description: Administrator only.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+    post:
+      operationId: createUser
+      summary: Approve account
+      description: Administrator only. Normalize email to lowercase; unique email.
+        Client role requires existing clientId; other roles normalize clientId null.
+        Enabled by default; no Google identity is fabricated.
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+  /api/users/{userId}:
+    patch:
+      operationId: updateUser
+      summary: Update approved account
+      description: Administrator only.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: *id008
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPatch'
+  /api/users/{userId}/assignments:
+    put:
+      operationId: setAssignments
+      summary: Replace marketer assignments
+      description: Administrator only, target must be marketer and every client ID
+        must exist. Replace complete assignment set atomically. Multiple marketers
+        per client permitted. Revocations effective on next request.
+      responses:
+        '204':
+          description: Successful operation.
+        '401': *id001
+        '403': *id002
+        '404': *id003
+        '409': *id004
+        '422': *id005
+        '503': *id006
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: *id008
+      - *id009
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignments'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: signaldesk_session
+      description: Opaque server-side session; HttpOnly, SameSite=Lax, Secure in HTTPS.
+        Mutations additionally require X-CSRF-Token and trusted Origin.
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code: *id007
+        message: *id007
+      required:
+      - code
+      - message
+    Money:
+      type: string
+      pattern: ^(0|[1-9][0-9]*)\.[0-9]{2}$
+      description: Nonnegative amount in client currency, exactly two fraction digits.
+        Stored as integer minor units.
+    Role:
+      type: string
+      enum:
+      - admin
+      - marketer
+      - client
+    Currency:
+      type: string
+      enum:
+      - KZT
+      - USD
+      - EUR
+    Channel:
+      type: string
+      enum:
+      - Google Ads
+      - Meta Ads
+      - TikTok Ads
+      - Other
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        email: &id015
+          type: string
+          format: email
+        name: &id014
+          type: string
+          minLength: 1
+          maxLength: 200
+          pattern: .*\S.*
+        role: &id016
+          $ref: '#/components/schemas/Role'
+        enabled: &id018
+          type: boolean
+        clientId: &id017
+          anyOf:
+          - *id008
+          - type: 'null'
+        clientIds:
+          type: array
+          items: *id008
+          uniqueItems: true
+      required:
+      - id
+      - email
+      - name
+      - role
+      - enabled
+      - clientId
+      - clientIds
+    UserCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id014
+        email: *id015
+        role: *id016
+        clientId: *id017
+      required:
+      - name
+      - email
+      - role
+      - clientId
+    UserPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        enabled: *id018
+        role: *id016
+        clientId: *id017
+      required: []
+      minProperties: 1
+      description: Validate merged resulting user before mutation. Client role requires
+        existing clientId; all other roles normalize clientId to null. Clear clientIds
+        whenever role changes. Current administrator cannot edit own account. Invalid
+        patch makes no changes.
+    Client:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        name: *id014
+        currency: &id019
+          $ref: '#/components/schemas/Currency'
+        archived: *id018
+      required:
+      - id
+      - name
+      - currency
+      - archived
+    ClientCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id014
+        currency:
+          $ref: '#/components/schemas/Currency'
+      required:
+      - name
+      - currency
+    ClientPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id014
+        currency: *id019
+        archived: *id018
+      required: []
+      minProperties: 1
+      description: Currency changes fail with 409 once any financial metric exists.
+        Archive preserves historical reports.
+    Campaign:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        clientId: *id008
+        name: *id014
+        channel:
+          $ref: '#/components/schemas/Channel'
+        archived: *id018
+      required:
+      - id
+      - clientId
+      - name
+      - channel
+      - archived
+    CampaignCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id014
+        channel:
+          $ref: '#/components/schemas/Channel'
+      required:
+      - name
+      - channel
+    CampaignPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        name: *id014
+        archived: *id018
+      required: []
+      minProperties: 1
+    MetricWrite:
+      type: object
+      additionalProperties: false
+      properties:
+        spend: &id021
+          $ref: '#/components/schemas/Money'
+        impressions: &id020
+          type: integer
+          minimum: 0
+        clicks: *id020
+        leads: *id020
+        sales: *id020
+        revenue: &id022
+          $ref: '#/components/schemas/Money'
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - spend
+      - impressions
+      - clicks
+      - leads
+      - sales
+      - revenue
+      description: Date in path is an Asia/Almaty calendar date, never future. Existing
+        campaign/date requires exact current version; omit version only for creation.
+        Existing row with omitted/stale version, or missing row with supplied version,
+        returns 409. All six base metrics required. No sales<=leads or clicks<=impressions
+        restriction.
+    Metric:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        campaignId: *id008
+        date:
+          type: string
+          format: date
+        spend: *id021
+        impressions: *id020
+        clicks: *id020
+        leads: *id020
+        sales: *id020
+        revenue: *id022
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - id
+      - campaignId
+      - date
+      - spend
+      - impressions
+      - clicks
+      - leads
+      - sales
+      - revenue
+      - version
+    Totals:
+      type: object
+      additionalProperties: false
+      properties:
+        spend: *id021
+        impressions: *id020
+        clicks: *id020
+        leads: *id020
+        sales: *id020
+        revenue: *id022
+        ctr: &id023
+          type:
+          - number
+          - 'null'
+          description: Null when denominator is zero; calculated from summed base
+            metrics.
+        cpc: *id023
+        cpl: *id023
+        roas: *id023
+      required:
+      - spend
+      - impressions
+      - clicks
+      - leads
+      - sales
+      - revenue
+      - ctr
+      - cpc
+      - cpl
+      - roas
+    DailyReport:
+      type: object
+      additionalProperties: false
+      properties:
+        date:
+          type: string
+          format: date
+        totals:
+          $ref: '#/components/schemas/Totals'
+      required:
+      - date
+      - totals
+    ChannelReport:
+      type: object
+      additionalProperties: false
+      properties:
+        channel:
+          $ref: '#/components/schemas/Channel'
+        totals:
+          $ref: '#/components/schemas/Totals'
+      required:
+      - channel
+      - totals
+    Report:
+      type: object
+      additionalProperties: false
+      properties:
+        clientId: *id008
+        currency:
+          $ref: '#/components/schemas/Currency'
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        totals:
+          $ref: '#/components/schemas/Totals'
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyReport'
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelReport'
+      required:
+      - clientId
+      - currency
+      - from
+      - to
+      - totals
+      - daily
+      - channels
+      description: Inclusive date range; missing dates are omitted (not confirmed
+        zero). Empty report has zero base totals, null ratios and empty daily/channel
+        arrays. All amounts belong to this single client currency; never sum mixed
+        currency. CTR percent, CPC/CPL currency amount, ROAS multiple.
+    Assignments:
+      type: object
+      additionalProperties: false
+      properties:
+        clientIds:
+          type: array
+          items: *id008
+          uniqueItems: true
+      required:
+      - clientIds
+    AuthStatus:
+      type: object
+      additionalProperties: false
+      properties:
+        configured: *id018
+      required:
+      - configured
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+        storage:
+          type: string
+          enum:
+          - memory
+          - sqlite
+      required:
+      - status
+      - storage
