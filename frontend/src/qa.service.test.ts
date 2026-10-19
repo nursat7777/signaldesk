@@ -18,3 +18,7 @@ describe('B01 independent role-transition regression',()=>{
  it('rejected patch preserves state',async()=>{const {service:s}=createMockService();const before=await s.listUsers();await expect(s.updateUser('u2',{role:'client',clientId:null})).rejects.toThrow();expect(await s.listUsers()).toEqual(before);});
  it('clears previous assignments and irrelevant association on role changes',async()=>{const {service:s}=createMockService();const viewer=await s.updateUser('u2',{role:'client',clientId:'c1'});expect(viewer.clientIds).toEqual([]);const marketer=await s.updateUser('u2',{role:'marketer'});expect(marketer.clientId).toBeNull();expect(marketer.clientIds).toEqual([]);const admin=await s.updateUser('u3',{role:'admin'});expect(admin.clientId).toBeNull();});
 });
+
+describe('Independent QA monetary range parity',()=>{
+ it('accepts valid large two-decimal amounts within contract limit',()=>{for(const spend of [123456789012.35,999999999999.99])expect(()=>validateMetric({...input(),spend})).not.toThrow();});
+});
