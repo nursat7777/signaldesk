@@ -372,7 +372,12 @@
         "prerequisites": "M10 independent QA PASS95 tests: engineerf8fb92d QAf55f286, _docs/evidence/iteration-4-M10-qa.md.",
         "scope_gate": "M11 SQL repository/defaultSQL/parity/process restart only; M12 frontend integration blocked until independent M11 QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-4-M11-qa.md",
+      "implementation_commit": "67618a7",
+      "qa_commit": "ff97bcf",
+      "checkpoint_tag": "iteration-4-sqlite-verified",
+      "process_note": "Independent122-test PASS includes actual two-uvicorn-process restart with session token, version2 metrics and report persistence. No GitHub publication implied."
     },
     {
       "local_id": "M12",
@@ -396,9 +401,10 @@
         "M11"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "note": "Ready when dependencies pass; no external issue or QA approval exists.",
-        "prerequisites": "Independent M11 QA PASS required before real frontend adapter implementation."
+        "prerequisites": "M11 independent QA122PASS: engineer67618a7, QAff97bcf, iteration-4-sqlite-verified.",
+        "scope_gate": "M12 frontend real REST adapter and auth shell only; M13 integrated journeys held for independent M12 QA PASS."
       },
       "qa_status": "not_run"
     },
@@ -425,8 +431,9 @@
         "M12"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists.",
+        "prerequisites": "Independent M12 QA PASS required before full integrated journey verification."
       },
       "qa_status": "not_run"
     },
@@ -440,12 +447,14 @@
         "mvp"
       ],
       "goal": "Deliver reproducible source and truthful evidence.",
-      "description": "Update README with exact verified commands, publish documentation and audit issue lifecycle.",
+      "description": "After M13 independent QA PASS, finalize reproducible local setup, actual verification commands/results, CI guidance and delivery audit. If GitHub remains unavailable, provide an honest source archive and exact publish next steps, explicitly incomplete external delivery. Do not invent repository URL, pushes, issues or closures.",
       "acceptance_criteria": [
-        "Required docs and authentic transcript are committed and pushed.",
-        "All published MVP and user-test-bug issues have QA PASS before closure.",
-        "Post-MVP remains open; repository URL and actual test results provided.",
-        "Any OAuth/hosting/connection blocker is clearly identified."
+        "README gives exact prerequisite/install/migration/environment/backend/frontend commands verified against final tree.",
+        "Google OAuth setup lists real required credentials/redirect and allowlist, no secrets bundled; absent live handshake and browser visual QA limits disclosed.",
+        "Full test/build/schema results and actual persistence workflow evidence summarized with paths.",
+        "All required docs, real transcripts and issue/bug local traceability included; pending GitHub actions remain explicit.",
+        "If GitHub available, push actual commits and verify actual QA-approved issue states; if unavailable, provide source archive and exact next commands without claiming assignment complete.",
+        "CI configuration or reproducible commands run the real backend/frontend/contract checks without browser/test bypass assumptions."
       ],
       "out_of_scope": "Features outside the approved MVP.",
       "constraints": "Follow approved plan, current iteration and role authorization.",
@@ -453,8 +462,10 @@
         "M13"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists.",
+        "prerequisites": "M13 independent QA PASS required; planning only at present.",
+        "scope_gate": "Final setup/delivery changes gated on M13; no external actions fabricated."
       },
       "qa_status": "not_run"
     },

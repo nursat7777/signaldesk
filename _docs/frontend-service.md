@@ -33,3 +33,11 @@ Charts and tables aggregate only selected client, never mixed currencies. CTR/CP
 ## UI structure and limitations
 
 App orchestrates state/forms/service calls. Sidebar, AgencySettings and Trend are separate components; `i18n.ts` centralizes EN/RU user-facing labels/errors. `style.css` defines responsive graphite/lime/cyan visual system and financial tabular figures. Date/campaign filters and daily forms have accessible labels, chart has accessible title and table equivalents. No unsupported growth percentage is claimed; icons are decorative only. Browser visual validation and live Google OAuth are unverified because environment capabilities/credentials are absent. No deployment is claimed.
+
+## Iteration 5 / M12 production adapter
+
+`createApiService(base='/api',fetcher=fetch)` now implements all thirteen operations and adds `authStatus`, `loginUrl`, `logout`. HTTP uses credentials include; GET `/me` captures exposed X-CSRF-Token; mutations send it. Browser sets Origin automatically (the adapter must not set this forbidden header). Fixed-decimal wire strings convert to numeric frontend display and validated numbers encode with `toFixed(2)`. Request bodies intentionally omit path IDs and unknown fields. Error codes map to localized ServiceError; network/proxy failures never fall back to mock data.
+
+`main.tsx` mounts AuthGate and real service by default. Only `import.meta.env.DEV && VITE_SERVICE_MODE=mock` dynamically creates the clearly marked preview. App requires an injected service; no singleton mock is instantiated. Production ignores mock mode. Vite proxies `/api` to backend8000 preserving actual Origin. Optional `VITE_API_BASE` supports an explicit backend base URL. Google config status is truthful: unconfigured server shows instructions, configured server offers real Google route. Logout revokes session with CSRF and returns to auth gate. Live provider authentication remains untested without credentials.
+
+Metric input count max2147483647; per-record spend/revenue max999999999999.99. Two-decimal input validation uses round-trip `Number(toFixed(2))` to avoid rejecting large supported decimals due binary multiplication. Money aggregation sums integer minor units using BigInt before converting report display. No mixed currency totals.

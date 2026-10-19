@@ -18,8 +18,6 @@ import {
   Layers3,
 } from "lucide-react";
 import {
-  service as defaultService,
-  mock,
   aggregate,
   channels,
   daysAgo,
@@ -42,11 +40,18 @@ import { AgencySettings } from "./components/AgencySettings";
 type Tab = "overview" | "campaigns" | "channels" | "team";
 type Modal = "metric" | "campaign" | "client" | "user" | null;
 export function App({
-  api = defaultService,
-  demo = true,
+  api,
+  demo = false,
+  demoController,
+  onLogout,
 }: {
-  api?: Service;
+  api: Service;
   demo?: boolean;
+  demoController?: {
+    setIdentity: (id: string) => void;
+    identities: () => User[];
+  };
+  onLogout?: () => void;
 }) {
   const [lang, setLang] = useState<"en" | "ru">(() =>
     localStorage.getItem("signaldesk-language") === "ru" ? "ru" : "en",
@@ -229,12 +234,17 @@ export function App({
             <span>{t(tab)}</span>
           </div>
           <div className="topbar-right">
+            {onLogout && (
+              <button className="text-btn" onClick={onLogout}>
+                {t("signout")}
+              </button>
+            )}
             <span className="timezone">ALMATY · UTC+5</span>
             <span className="topbar-divider" />
             <span className="tiny-avatar">{me?.name?.slice(0, 1) || "S"}</span>
           </div>
         </header>
-        {demo && (
+        {demo && demoController && (
           <div className="demo-banner">
             <span>{t("demo")}</span>
             <label>
@@ -243,12 +253,12 @@ export function App({
                 aria-label={t("demoHint")}
                 value={me?.id || "u1"}
                 onChange={(e) => {
-                  mock.setIdentity(e.target.value);
+                  demoController.setIdentity(e.target.value);
                   setSelected("");
                   setRevision((r) => r + 1);
                 }}
               >
-                {mock
+                {demoController
                   .identities()
                   .filter((u) => u.enabled)
                   .map((u) => (
@@ -792,6 +802,11 @@ export function App({
                         aria-label={t(k)}
                         type="number"
                         min="0"
+                        max={
+                          k === "spend" || k === "revenue"
+                            ? "999999999999.99"
+                            : "2147483647"
+                        }
                         step={k === "spend" || k === "revenue" ? "0.01" : "1"}
                         required
                         value={values[k] ?? ""}

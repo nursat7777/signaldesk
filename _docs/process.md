@@ -45,5 +45,7 @@ Stage 0 documentation received local independent QA evidence at `_docs/evidence/
 | M07 memory auth | e41c3af | 2229a1e, 41 tests | iteration-3-M07-qa.md |
 | M08 memory CRUD | bdb554b | 414bf2c, 75 tests | iteration-3-M08-qa.md |
 | M09 memory reports | 7a67961 | f0bc882, 82 tests | iteration-3-M09-qa.md |
+| M10 SQL schema/migrations | f8fb92d | f55f286, 95 tests | iteration-4-M10-qa.md |
+| M11 SQLite repositories/restart | 67618a7 | ff97bcf, 122 tests | iteration-4-M11-qa.md |
 
-Evidence filenames are relative to `_docs/evidence/`. Iteration 3 checkpoint tag is `iteration-3-memory-verified`. Counts reflect each observed checkpoint, not additive test totals. M10 schema/migrations is released; M11 repository replacement, process restart and full integration are not implied complete. GitHub publication remains pending. Browser visual QA and live Google OAuth handshake remain unverified; actual JWT cryptographic checks used mocked provider HTTP. Follow methodology-limitations.md for genuine external-flow and bundled-stage deviations.
+Evidence filenames are relative to `_docs/evidence/`. Iteration 3 checkpoint tag is `iteration-3-memory-verified`. Counts reflect each observed checkpoint, not additive test totals. Iteration 4 checkpoint tag is `iteration-4-sqlite-verified`. Actual two-process Uvicorn restart preserved session token, version2 metrics and report. M12 frontend adapter/auth shell is released; M13 full integration remains gated on M12 independent QA. GitHub publication remains pending. Browser visual QA and live Google OAuth handshake remain unverified; actual JWT cryptographic checks used mocked provider HTTP. Follow methodology-limitations.md for genuine external-flow and bundled-stage deviations.

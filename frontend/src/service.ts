@@ -76,7 +76,18 @@ export function aggregate(rows: Metric[]) {
     sales: 0,
     revenue: 0,
   };
-  rows.forEach((r) => metricKeys.forEach((k) => (total[k] += r[k])));
+  // Sum money in minor units so ordinary decimal fractions cannot accumulate drift.
+  // BigInt also preserves exact minor-unit addition beyond a single record's safe bound.
+  let spendMinor = 0n,
+    revenueMinor = 0n;
+  rows.forEach((r) => {
+    spendMinor += BigInt(Math.round(r.spend * 100));
+    revenueMinor += BigInt(Math.round(r.revenue * 100));
+    for (const k of ["impressions", "clicks", "leads", "sales"] as const)
+      total[k] += r[k];
+  });
+  total.spend = Number(spendMinor) / 100;
+  total.revenue = Number(revenueMinor) / 100;
   return {
     ...total,
     ctr: total.impressions ? (total.clicks / total.impressions) * 100 : null,
@@ -97,9 +108,10 @@ export function validateMetric(m: MetricInput) {
     if (
       !Number.isFinite(m[k]) ||
       m[k] < 0 ||
+      m[k] >
+        (["spend", "revenue"].includes(k) ? 999999999999.99 : 2147483647) ||
       (!["spend", "revenue"].includes(k) && !Number.isInteger(m[k])) ||
-      (["spend", "revenue"].includes(k) &&
-        Math.abs(m[k] * 100 - Math.round(m[k] * 100)) > 0.00001)
+      (["spend", "revenue"].includes(k) && Number(m[k].toFixed(2)) !== m[k])
     )
       throw new ServiceError("invalidNumber");
   });
@@ -398,5 +410,3 @@ export function createMockService() {
     identities: () => clone(users),
   };
 }
-export const mock = createMockService();
-export const service = mock.service;
