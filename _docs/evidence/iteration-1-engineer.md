@@ -18,3 +18,9 @@ Independent QA owns `_docs/evidence/iteration-1-qa.md` and final acceptance; thi
 ## Limitations
 
 No browser visual/responsive inspection was available; RTL/jsdom verifies actual React interactions but cannot prove browser layout. Google authentication handshake untested and not implemented in mock-only iteration. Default entrypoint intentionally shows mock preview until iteration5 replaces it with real service; never deploy this preview as production authentication. No real data persistence is claimed until SQLite iteration.
+
+## B02 financial display correction
+
+Independent QA reproduced monetary .25 fractions disappearing in reports; recorded B02 with failed regression before change. PM groomed and released targeted fix on 2026-10-19. Engineer changed the shared report currency formatter from `maximumFractionDigits:0` to `minimumFractionDigits:2, maximumFractionDigits:2`. Totals, campaign/channel rows, CPC/CPL and chart labels retain two decimals in EN/RU without changing stored values or currency grouping.
+
+Executed after fix: `npm test` exit 0, **17/17 passed across 3 files**, including independent financial precision regression. `npm run build` exit 0, TypeScript and Vite successful (265.70 kB JS, 82.36 kB gzip). No other source changes made. Handed back to independent QA; no issue closure claimed.

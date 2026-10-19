@@ -46,6 +46,46 @@
       "out_of_scope": "OAuth provider behavior, backend implementation and new account invitation features.",
       "constraints": "Follow ServiceError validation conventions, admin-only mutation, self-account protections, approved client access boundaries; no production auth bypass. Preserve IDs/email/name/enabled unless explicitly edited.",
       "fix_evidence": "Frontend engineer added merged-user validation and role-specific association cleanup; QA executed final build exit 0."
+    },
+    {
+      "local_id": "B02",
+      "title": "Financial reports round away entered currency fractions",
+      "labels": [
+        "user-test-bug"
+      ],
+      "github_url": null,
+      "publication_status": "pending_publish",
+      "status": "verified_fixed_locally_pending_github_publication",
+      "reproduction_steps": [
+        "Render App against service returning spend=10.25 and revenue=30.75 for selected client.",
+        "Review report monetary totals and campaign table."
+      ],
+      "expected": "Reports retain supported two-decimal monetary precision; 10.25 remains visible.",
+      "actual": "App money formatter maximumFractionDigits:0 renders 10 instead of10.25.",
+      "impact": "Agency reports hide entered fractional amounts and can show misleading rounded small costs.",
+      "qa_test_cases": [
+        "qa.interactions.test.tsx: preserves entered fractional money in report display"
+      ],
+      "evidence": "2026-10-19 npm test -- --run src/qa.interactions.test.tsx --testNamePattern=fractional money exit1; one failed (four skipped).",
+      "pm_grooming": {
+        "status": "groomed_locally",
+        "reviewer": "PM architecture role",
+        "date": "2026-10-19",
+        "basis": "Observed failed independent qa.interactions fractional-money test; reproduction and regression case already provided by QA.",
+        "publication": "pending_publish; no external issue exists."
+      },
+      "qa_verification": "PASS 2026-10-19: npm test -- --maxWorkers=1 exit0 17/17; independent financial regression validates EN KZT10.25, CPL2.56 and RU10,25; currency symbol variant follows runtime Intl locale. npm run build exit0.",
+      "goal": "Display entered financial amounts without discarding currency fractions.",
+      "description": "Executed RTL reproduction demonstrates report formatter rounds spend 10.25 to 10. Correct shared money formatting across totals, report rows and monetary cost ratios while retaining locale and client currency.",
+      "acceptance_criteria": [
+        "Spend/revenue totals and campaign/channel monetary rows show two decimal digits in both EN and RU locales.",
+        "Input 10.25 remains visibly 10.25 (or locale-equivalent 10,25), including small nonzero amounts.",
+        "CPC and CPL monetary values preserve two decimals; zero-denominator values remain unavailable.",
+        "Currency remains client-specific; count and ratio formatting is not unintentionally changed.",
+        "Independent fractional-money regression and full frontend suite pass."
+      ],
+      "out_of_scope": "Currency conversion, backend amount storage, new export features.",
+      "constraints": "Preserve accessible labels, locale formatting, currency symbol and existing Service data. Update presentation only; no mutation of entered amounts."
     }
   ]
 }

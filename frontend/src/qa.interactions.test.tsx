@@ -24,3 +24,7 @@ describe('Independent QA daily workflow',()=>{
 describe('Independent QA asynchronous states',()=>{
  it('shows loading before current user response and a recoverable service error',async()=>{const m=createMockService();let reject!:(error:unknown)=>void;const pending=new Promise<never>((_,r)=>{reject=r});render(<App api={{...m.service,getMe:()=>pending}} demo={false}/>);expect(screen.getAllByText('Loading workspace…').length).toBeGreaterThan(0);reject(new ServiceError('forbidden'));await screen.findByRole('alert');expect(screen.getByRole('alert')).toHaveTextContent('Your account does not have access to this action.');});
 });
+
+describe('Independent QA financial precision',()=>{
+ it('preserves entered fractional money in report display',async()=>{const m=createMockService();const date=daysAgo(0);const row={id:'qa-money',campaignId:'p1',date,spend:10.25,impressions:100,clicks:20,leads:4,sales:2,revenue:30.75,version:1};render(<App api={{...m.service,listMetrics:async()=>[row]}} demo={false}/>);const exact=/KZT\s10\.25/;await waitFor(()=>expect(screen.getAllByText(exact).length).toBeGreaterThan(0));expect(screen.getAllByText(/KZT\s2\.56/).length).toBeGreaterThan(0);await userEvent.click(screen.getByRole('button',{name:/English/}));await waitFor(()=>expect(screen.getAllByText(/10,25\s(?:₸|KZT)/).length).toBeGreaterThan(0));});
+});

@@ -82,7 +82,8 @@ export function App({
     new Intl.NumberFormat(lang === "en" ? "en-US" : "ru-RU", {
       style: "currency",
       currency: client?.currency || "USD",
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(n);
   const num = (n: number) =>
     new Intl.NumberFormat(lang === "en" ? "en-US" : "ru-RU", {
