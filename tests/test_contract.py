@@ -33,3 +33,13 @@ def test_invalid_schema_examples(name,value):assert list(validator(name).iter_er
 def test_empty_report_example():
  totals=dict(spend='0.00',revenue='0.00',impressions=0,clicks=0,leads=0,sales=0,ctr=None,cpc=None,cpl=None,roas=None)
  validator('Report').validate(dict(clientId='c1',currency='KZT',**{'from':'2026-10-01','to':'2026-10-19'},totals=totals,daily=[],channels=[]))
+
+@pytest.mark.parametrize('value,valid',[('999999999999.99',True),('1000000000000.00',False)])
+def test_input_money_bound(value,valid):assert (not list(validator('MoneyInput').iter_errors(value))) is valid
+@pytest.mark.parametrize('value,valid',[(2147483647,True),(2147483648,False)])
+def test_input_count_bound(value,valid):assert (not list(validator('CountInput').iter_errors(value))) is valid
+
+def test_output_aggregate_not_limited_to_input_bounds():
+ validator('Money').validate('1000000000000.00')
+ totals=dict(spend='1000000000000.00',revenue='0.00',impressions=2147483648,clicks=0,leads=0,sales=0,ctr=0,cpc=None,cpl=None,roas=0)
+ validator('Totals').validate(totals)
