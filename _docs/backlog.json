@@ -406,7 +406,11 @@
         "prerequisites": "M11 independent QA122PASS: engineer67618a7, QAff97bcf, iteration-4-sqlite-verified.",
         "scope_gate": "M12 frontend real REST adapter and auth shell only; M13 integrated journeys held for independent M12 QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-5-M12-qa.md",
+      "implementation_commit": "0721fb6",
+      "qa_commit": "41019f2",
+      "process_note": "Independent frontend30 tests and production build PASS; actual full HTTP+React journeys belong to M13. Publication pending."
     },
     {
       "local_id": "M13",
@@ -418,12 +422,15 @@
         "mvp"
       ],
       "goal": "Prove integrated behavior by running it.",
-      "description": "QA executes admin setup, marketer daily entry and client report journeys with evidence.",
+      "description": "After M12 independent QA PASS, run actual HTTP plus React Testing Library integrated admin, marketer and client workflows against a real backend with temporary SQLite. Test session cookies may be seeded solely in isolated disposable fixtures; there is no production auth bypass. Preserve raw logs and exact commands. Browser visual QA and live Google handshake remain unverified.",
       "acceptance_criteria": [
-        "Run frontend interaction, backend, contract and integrated workflow checks.",
-        "Verify direct forbidden requests, RU/EN, responsive layout and persistence.",
-        "Every discovered defect gets user-test-bug issue and verified regression fix.",
-        "Independent QA records PASS/FAIL and unresolved Google/deployment limitations honestly."
+        "Run real backend with temporary migrated SQLite and isolated known fixture-session cookie jars; frontend adapter uses actual HTTP, not mockService.",
+        "React RTL admin creates client, approved marketer/viewer and assignments; marketer creates campaign and daily metrics; viewer reads correct authorized reports.",
+        "Exercise update-existing-day, duplicate/stale conflict, custom dates, monetary fractions, RU/EN and unauthorized direct API calls.",
+        "Revocation and current assignment changes take effect; viewer cannot mutate or access another client, and marketer cannot access unassigned client.",
+        "Record real process persistence workflow evidence and complete backend/frontend/build/contract regressions with raw logs.",
+        "Discovered bugs retain local user-test-bug reproduction, PM grooming, regression fix and independent verification; no external issue claim.",
+        "Explicitly distinguish real HTTP+React/jsdom integration from unexecuted browser visual QA and unverified live Google provider login."
       ],
       "out_of_scope": "Features outside the approved MVP.",
       "constraints": "Follow approved plan, current iteration and role authorization.",
@@ -431,9 +438,10 @@
         "M12"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "note": "Ready when dependencies pass; no external issue or QA approval exists.",
-        "prerequisites": "Independent M12 QA PASS required before full integrated journey verification."
+        "prerequisites": "M12 independent QA PASS frontend30/build, engineer0721fb6 QA41019f2, _docs/evidence/iteration-5-M12-qa.md.",
+        "scope_gate": "M13 full integrated verification only; M14 final setup/CI/delivery remains blocked until independent M13 QA PASS."
       },
       "qa_status": "not_run"
     },
