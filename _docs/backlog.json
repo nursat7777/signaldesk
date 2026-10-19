@@ -335,7 +335,11 @@
         "prerequisites": "M09 independent QA PASS: engineer7a67961, QAf0bc882, full82 tests, iteration-3-memory-verified.",
         "scope_gate": "M10 models/migrations only; M11 repository replacement and actual restart verification blocked until M10 independent QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-4-M10-qa.md",
+      "implementation_commit": "f8fb92d",
+      "qa_commit": "f55f286",
+      "process_note": "Independent full95-test PASS for SQLAlchemy schema and Alembic migrations; SQLite runtime activation belongs to M11. Publication pending."
     },
     {
       "local_id": "M11",
@@ -347,22 +351,26 @@
         "mvp"
       ],
       "goal": "Keep accepted data after process restart.",
-      "description": "Implement SQLAlchemy repositories retaining contract and domain behavior.",
+      "description": "Replace in-memory repository implementation with SQLAlchemy-backed SQLite repositories after M10 QA. Default runtime uses configured SQLite and requires Alembic schema setup rather than silently bypassing migrations. Preserve contract/auth/domain semantics and test both repository implementations. Demonstrate persistence using an actual stopped and restarted backend process against the same database file.",
       "acceptance_criteria": [
-        "Repository parity and SQLite API regression checks run.",
-        "Start backend, write data, stop and restart process, then read same data from same file.",
-        "Conflicting updates and transaction rollback remain correct."
+        "Default application repository is SQL-backed; explicitly selected memory mode remains available for parity tests only as documented.",
+        "Fresh runtime without required migrations provides an actionable failure; documented Alembic upgrade initializes schema.",
+        "Existing domain/auth tests exercise SQLite as well as memory: users/assignments/campaigns/daily versions/archives/report totals preserve behavior.",
+        "SQLite unique constraints and transaction atomicity reject duplicate dates, stale versions and invalid mutations without partial state changes.",
+        "Server sessions and OAuth state use persisted repositories with expiry/one-time semantics and no plaintext provider credentials.",
+        "Run actual server process, write fixture data through authorized API, stop process, restart with identical SQLite file and read same authorized data and report. Record process commands/results.",
+        "Run API regression, migration and repository parity tests; no frontend real-API integration until independent M11 QA PASS."
       ],
       "out_of_scope": "Features outside the approved MVP.",
-      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "constraints": "M11 repository/runtime/restart only. Use M10 Alembic schema, frozen REST contract and safe per-record bounds. No production authentication test bypass; HTTP tests may inject isolated session fixtures with honest labeling. Preserve actual restart evidence, not merely opening a second ORM session.",
       "dependencies": [
         "M10"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "note": "Ready when dependencies pass; no external issue or QA approval exists.",
-        "prerequisites": "M10 independent QA PASS required.",
-        "scope_gate": "SQLite repository substitution, parity and actual process restart evidence; no frontend integration until M11 independent QA PASS."
+        "prerequisites": "M10 independent QA PASS95 tests: engineerf8fb92d QAf55f286, _docs/evidence/iteration-4-M10-qa.md.",
+        "scope_gate": "M11 SQL repository/defaultSQL/parity/process restart only; M12 frontend integration blocked until independent M11 QA PASS."
       },
       "qa_status": "not_run"
     },
@@ -388,8 +396,9 @@
         "M11"
       ],
       "pm_grooming": {
-        "status": "groomed_locally",
-        "note": "Ready when dependencies pass; no external issue or QA approval exists."
+        "status": "groomed_locally_blocked",
+        "note": "Ready when dependencies pass; no external issue or QA approval exists.",
+        "prerequisites": "Independent M11 QA PASS required before real frontend adapter implementation."
       },
       "qa_status": "not_run"
     },

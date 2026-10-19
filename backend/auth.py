@@ -40,12 +40,12 @@ def current_session(request: Request):
     repo = request.app.state.repo
     token = request.cookies.get(COOKIE, '')
     with repo.lock:
-        session = repo.sessions.get(token_hash(token))
+        session = repo.session_get(token_hash(token))
         if not session or session['expires'] <= now():
             if session:
-                repo.sessions.pop(token_hash(token), None)
+                repo.session_delete(token_hash(token))
             raise ApiError(401, 'unauthorized')
-        user = repo.users.get(session['userId'])
+        user = repo.get('users', session['userId'])
         if not user or not user['enabled']:
             raise ApiError(403, 'forbidden')
         return user, session

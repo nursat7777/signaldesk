@@ -19,6 +19,7 @@ def token_hash(token):
 
 @dataclass
 class Settings:
+    database_url: str = 'sqlite:///signaldesk.sqlite3'
     google_client_id: str = ''
     google_client_secret: str = ''
     google_redirect_uri: str = 'http://localhost:8000/api/auth/google/callback'
@@ -46,7 +47,7 @@ class Settings:
     def from_env(cls):
         load_dotenv()
         frontend = os.getenv('FRONTEND_URL', 'http://localhost:5173')
-        return cls(google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+        return cls(database_url=os.getenv('DATABASE_URL', 'sqlite:///signaldesk.sqlite3'), google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
                    google_client_secret=os.getenv('GOOGLE_CLIENT_SECRET', ''),
                    google_redirect_uri=os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:8000/api/auth/google/callback'),
                    frontend_url=frontend,
@@ -81,6 +82,21 @@ class MemoryRepository:
         self.sessions[token_hash(token)] = dict(userId=user_id, csrf=csrf, expires=now() + lifetime)
         return token, csrf
 
+
+    def session_get(self, digest):
+        return copy.deepcopy(self.sessions.get(digest))
+
+    def session_delete(self, digest):
+        self.sessions.pop(digest, None)
+
+    def oauth_begin(self, digest, nonce, expires):
+        for old in list(self.oauth_transactions):
+            if self.oauth_transactions[old]['expires'] <= now():
+                del self.oauth_transactions[old]
+        self.oauth_transactions[digest] = dict(nonce=nonce, expires=expires)
+
+    def oauth_consume(self, digest):
+        return self.oauth_transactions.pop(digest, None)
 
     def get(self, collection, key):
         return copy.deepcopy(getattr(self, collection).get(key))

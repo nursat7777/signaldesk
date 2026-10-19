@@ -10,7 +10,10 @@ from .core import ApiError, MemoryRepository, Settings, now, public_user, token_
 
 def create_app(settings=None, repository=None):
     settings = settings or Settings.from_env()
-    repo = repository or MemoryRepository()
+    if repository is None:
+        from .sql_repository import SQLRepository
+        repository = SQLRepository(settings.database_url)
+    repo = repository
     repo.bootstrap(settings.bootstrap_admin_email)
     app = FastAPI(title='SignalDesk', version='1.0.0')
     app.state.repo, app.state.settings, app.state.oauth_provider = repo, settings, GoogleProvider()
@@ -52,7 +55,7 @@ def create_app(settings=None, repository=None):
     @app.post('/api/auth/logout', status_code=204, operation_id='logout')
     def logout(request: Request, auth=Depends(mutation_session)):
         with repo.lock:
-            repo.sessions.pop(token_hash(request.cookies.get(COOKIE, '')), None)
+            repo.session_delete(token_hash(request.cookies.get(COOKIE, '')))
         response = Response(status_code=204)
         response.delete_cookie(COOKIE, httponly=True, secure=settings.secure_cookies, samesite='lax')
         return response
@@ -63,11 +66,7 @@ def create_app(settings=None, repository=None):
             raise ApiError(503, 'oauthNotConfigured', 'Configure Google OAuth credentials and approved administrator email')
         state, nonce = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
         with repo.lock:
-            # Bounded expiry cleanup prevents abandoned sign-in transactions accumulating.
-            for old in list(repo.oauth_transactions):
-                if repo.oauth_transactions[old]['expires'] <= now():
-                    del repo.oauth_transactions[old]
-            repo.oauth_transactions[token_hash(state)] = {'nonce': nonce, 'expires': now() + 600}
+            repo.oauth_begin(token_hash(state), nonce, now() + 600)
         response = RedirectResponse(app.state.oauth_provider.authorization_url(settings, state, nonce), status_code=302)
         response.set_cookie(STATE_COOKIE, state, max_age=600, httponly=True, secure=settings.secure_cookies,
                             samesite='lax', path='/api/auth/google/callback')
@@ -82,7 +81,7 @@ def create_app(settings=None, repository=None):
         if not state or not secrets.compare_digest(state, browser_state):
             raise ApiError(403, 'oauthFailed', 'Invalid browser-bound OAuth state')
         with repo.lock:
-            transaction = repo.oauth_transactions.pop(token_hash(state), None)
+            transaction = repo.oauth_consume(token_hash(state))
         if not transaction or transaction['expires'] <= now() or not code or error:
             raise ApiError(403, 'oauthFailed', 'Expired or invalid OAuth transaction')
         try:
@@ -92,11 +91,11 @@ def create_app(settings=None, repository=None):
         except Exception:
             raise ApiError(403, 'oauthFailed', 'Google identity verification failed')
         with repo.lock:
-            user = next((u for u in repo.users.values() if u['email'] == identity['email']), None)
+            user = next((u for u in repo.all('users') if u['email'] == identity['email']), None)
             if not user or not user['enabled'] or (user['googleSub'] and user['googleSub'] != identity['sub']):
                 raise ApiError(403, 'forbidden')
-            user['googleSub'] = identity['sub']
-            repo.sessions.pop(token_hash(request.cookies.get(COOKIE, '')), None)
+            repo.update('users', user['id'], {'googleSub': identity['sub']})
+            repo.session_delete(token_hash(request.cookies.get(COOKIE, '')))
             token, _ = repo.create_session(user['id'], settings.session_seconds)
         response = RedirectResponse(settings.frontend_url, status_code=302)
         response.delete_cookie(STATE_COOKIE, path='/api/auth/google/callback')
@@ -109,5 +108,3 @@ def create_app(settings=None, repository=None):
     app.include_router(report_router())
     return app
 
-
-app = create_app()
