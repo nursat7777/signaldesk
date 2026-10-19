@@ -2,7 +2,7 @@
 from pathlib import Path
 import yaml
 from jsonschema import Draft202012Validator,FormatChecker
-from test_qa_domain import domainenv,BASE,DAY
+from tests.test_qa_domain import domainenv,BASE,DAY
 from backend.app import create_app
 from backend.core import Settings,MemoryRepository
 DOC=yaml.safe_load((Path(__file__).resolve().parents[1]/'_docs/openapi.yml').read_text())

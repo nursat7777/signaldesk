@@ -6,12 +6,19 @@ from backend.core import Settings,MemoryRepository
 from backend.auth import COOKIE
 DAY='2026-01-02'
 BASE={'spend':'10.25','revenue':'35.75','impressions':100,'clicks':50,'leads':5,'sales':2}
-@pytest.fixture
-def domainenv():
- repo=MemoryRepository();app=create_app(Settings(bootstrap_admin_email='admin@example.com'),repo);c=TestClient(app)
+@pytest.fixture(params=['memory','sqlite'])
+def domainenv(request,tmp_path,monkeypatch):
+ if request.param=='sqlite':
+  from alembic import command
+  from alembic.config import Config
+  from backend.sql_repository import SQLRepository
+  url='sqlite:///'+str(tmp_path/'qa-parity.sqlite3');monkeypatch.setenv('DATABASE_URL',url);command.upgrade(Config('alembic.ini'),'head');repo=SQLRepository(url)
+ else:repo=MemoryRepository()
+ app=create_app(Settings(bootstrap_admin_email='admin@example.com'),repo);c=TestClient(app)
  def as_user(uid):
   c.cookies.clear();token,csrf=repo.create_session(uid,3600);c.cookies.set(COOKIE,token);return {'Origin':'http://localhost:5173','X-CSRF-Token':csrf}
- admin=next(iter(repo.users));headers=as_user(admin)
+ with repo.lock:admin=repo.all('users')[0]['id']
+ headers=as_user(admin)
  def post(path,data):
   r=c.post(path,json=data,headers=headers);assert r.status_code==201,r.text;return r.json()
  c1=post('/api/clients',{'name':'QA One','currency':'USD'})
@@ -20,7 +27,8 @@ def domainenv():
  viewer=post('/api/users',{'name':'QA Viewer','email':'viewer@example.com','role':'client','clientId':c1['id']})
  assert c.put(f"/api/users/{marketer['id']}/assignments",json={'clientIds':[c1['id']]},headers=headers).status_code==204
  campaign=post(f"/api/clients/{c1['id']}/campaigns",{'name':'QA Search','channel':'Google Ads'})
- return repo,c,as_user,admin,headers,c1,c2,marketer,viewer,campaign
+ yield repo,c,as_user,admin,headers,c1,c2,marketer,viewer,campaign
+ if request.param=='sqlite':repo.engine.dispose()
 
 def test_role_id_boundaries_and_revocation(domainenv):
  repo,c,as_user,admin,h,c1,c2,marketer,viewer,p=domainenv
