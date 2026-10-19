@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import copy
 import hashlib
 import os
 import secrets
@@ -79,6 +80,33 @@ class MemoryRepository:
         token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
         self.sessions[token_hash(token)] = dict(userId=user_id, csrf=csrf, expires=now() + lifetime)
         return token, csrf
+
+
+    def get(self, collection, key):
+        return copy.deepcopy(getattr(self, collection).get(key))
+
+    def all(self, collection):
+        return copy.deepcopy(list(getattr(self, collection).values()))
+
+    def insert(self, collection, row):
+        getattr(self, collection)[row['id']] = copy.deepcopy(row)
+        return copy.deepcopy(row)
+
+    def update(self, collection, key, changes):
+        getattr(self, collection)[key].update(copy.deepcopy(changes))
+        return self.get(collection, key)
+
+    def save_metric(self, campaign_id, day, values, expected_version):
+        # Caller holds transaction lock; this method owns atomic version comparison.
+        existing = next((m for m in self.metrics.values() if m['campaignId'] == campaign_id and m['date'] == day), None)
+        if existing:
+            if expected_version != existing['version']:
+                raise ApiError(409, 'conflict')
+            return self.update('metrics', existing['id'], {**values, 'version': existing['version'] + 1})
+        if expected_version is not None:
+            raise ApiError(409, 'conflict')
+        return self.insert('metrics', dict(id=secrets.token_urlsafe(16), campaignId=campaign_id, date=day,
+                                          **values, version=1))
 
 
 def public_user(user):

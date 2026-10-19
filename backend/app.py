@@ -24,7 +24,11 @@ def create_app(settings=None, repository=None):
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
-        return JSONResponse({'code': 'required', 'message': 'Invalid request fields'}, status_code=422)
+        errors = exc.errors()
+        locations = {part for error in errors for part in error['loc']}
+        missing = any(error['type'] == 'missing' for error in errors)
+        code = 'required' if missing else 'invalidEmail' if 'email' in locations else 'invalidNumber' if locations & {'spend', 'revenue', 'impressions', 'clicks', 'leads', 'sales', 'version'} else 'required'
+        return JSONResponse({'code': code, 'message': 'Invalid request fields'}, status_code=422)
 
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
@@ -99,6 +103,8 @@ def create_app(settings=None, repository=None):
         response.set_cookie(COOKIE, token, max_age=settings.session_seconds, httponly=True,
                             secure=settings.secure_cookies, samesite='lax')
         return response
+    from .domain import router
+    app.include_router(router())
     return app
 
 

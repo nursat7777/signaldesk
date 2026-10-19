@@ -218,7 +218,11 @@
         "scope_gate": "M07 only; await independent QA before M08.",
         "publication": "pending_publish"
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-3-M07-qa.md",
+      "implementation_commit": "e41c3af",
+      "qa_commit": "2229a1e",
+      "process_note": "Independent 41-test suite PASS includes actual JWT cryptographic verification with mocked provider HTTP; live Google handshake remains unverified. GitHub publication pending."
     },
     {
       "local_id": "M08",
@@ -247,11 +251,12 @@
         "M07"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "reviewer": "PM architecture role",
         "date": "2026-10-19",
-        "prerequisites": "M07 independent QA PASS required before implementation.",
-        "publication": "pending_publish"
+        "prerequisites": "M07 independent QA PASS: implementation e41c3af, QA2229a1e, _docs/evidence/iteration-3-M07-qa.md.",
+        "publication": "pending_publish",
+        "scope_gate": "M08 domain CRUD only; M09 reporting blocked until independent M08 QA PASS."
       },
       "qa_status": "not_run"
     },

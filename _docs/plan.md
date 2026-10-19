@@ -98,3 +98,7 @@ GitHub Issues become the canonical backlog, labeled mvp, post-mvp or user-test-b
 
 ## Approval gate
 Final specification approved with the exact user message “да давай сделать и не забудь зайти в мой гит”. This authorizes implementation and GitHub connection/setup within the approved scope.
+
+## Engineering validation safeguard — iteration 3 refinement
+
+Daily record inputs are capped at 999999999999.99 per monetary field and 2147483647 per count. These bounds prevent unsafe frontend numeric adaptation and future storage overflow at values far beyond expected MVP operations. They apply to individual input records, not report aggregates or response totals. Money remains fixed two-decimal strings on the wire and integer minor units in persistence. This is an engineering validation refinement; no new product feature or fabricated user answer is implied. The modified contract requires renewed independent schema/example verification, not reliance solely on the earlier stage 2 gate.

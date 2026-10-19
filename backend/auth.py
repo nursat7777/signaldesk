@@ -61,5 +61,5 @@ def mutation_session(request: Request, auth=Depends(current_session)):
 
 
 def require_admin(user):
-    if user['role'] != 'admin':
+    if user['role'] != 'admin' or not user['enabled']:
         raise ApiError(403, 'forbidden')
