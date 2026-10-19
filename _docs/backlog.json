@@ -296,7 +296,12 @@
         "publication": "pending_publish",
         "scope_gate": "M09 reporting only; M10 ORM/migrations remains blocked until M09 independent QA PASS."
       },
-      "qa_status": "not_run"
+      "qa_status": "passed_locally",
+      "qa_evidence": "_docs/evidence/iteration-3-M09-qa.md",
+      "implementation_commit": "7a67961",
+      "qa_commit": "f0bc882",
+      "checkpoint_tag": "iteration-3-memory-verified",
+      "process_note": "Independent full82-test PASS for in-memory reporting; external issue publication pending."
     },
     {
       "local_id": "M10",
@@ -308,22 +313,27 @@
         "mvp"
       ],
       "goal": "Persist domain data with a portable ORM.",
-      "description": "Create models, relations, constraints and migration-managed SQLite schema.",
+      "description": "After independent memory-stage PASS, add SQLAlchemy models and Alembic migrations for the contract domain, sessions and OAuth transactions. This issue establishes schema and migration evidence only; preserve active in-memory application behavior until M11 repository replacement.",
       "acceptance_criteria": [
-        "Fresh migration creates all required domain/session tables.",
-        "Campaign/date and assignment uniqueness enforced in database.",
-        "Money uses fixed integer minor units; file/config/secrets excluded from git."
+        "Upgrade a fresh temporary SQLite file through Alembic head and inspect expected tables, columns, foreign keys and indexes.",
+        "Users have unique normalized email/Google subject as appropriate; sessions/OAuth transactions reference persisted identity state without plaintext credentials.",
+        "Assignments are unique per user/client pair; campaigns reference clients; daily metrics reference campaigns and unique campaign/date is enforced at database level.",
+        "Money columns store integer minor units, input numeric bounds and nonnegative count/version constraints are represented consistently with domain validation.",
+        "Archive/version/timestamps and session expiry fields support approved behavior; foreign-key enforcement is enabled and tested on real SQLite connection.",
+        "Run migration downgrade/upgrade on temporary data where supported and record actual behavior; never destroy user database.",
+        "ORM code avoids SQLite-specific business SQL and config exposes database URL/file path; database files/secrets excluded from git.",
+        "Current memory backend regression continues passing; no SQLite repository activation or frontend integration in M10."
       ],
       "out_of_scope": "Features outside the approved MVP.",
-      "constraints": "Follow approved plan, current iteration and role authorization.",
+      "constraints": "M10 schema/migrations only. Active application remains memory-backed until M11 release. Keep frozen contract, signed integer minor-unit storage, exact input limits and non-destructive user data behavior. Test migrations only on disposable temporary files.",
       "dependencies": [
         "M09"
       ],
       "pm_grooming": {
-        "status": "groomed_locally_blocked",
+        "status": "groomed_locally_ready",
         "note": "Ready when dependencies pass; no external issue or QA approval exists.",
-        "prerequisites": "M09 independent QA PASS required.",
-        "scope_gate": "Models and Alembic schema only; M11 repository replacement/restart verification is separate and requires M10 independent QA PASS."
+        "prerequisites": "M09 independent QA PASS: engineer7a67961, QAf0bc882, full82 tests, iteration-3-memory-verified.",
+        "scope_gate": "M10 models/migrations only; M11 repository replacement and actual restart verification blocked until M10 independent QA PASS."
       },
       "qa_status": "not_run"
     },

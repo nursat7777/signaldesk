@@ -34,3 +34,16 @@ Create labels `mvp`, `post-mvp`, `user-test-bug`. `_docs/backlog.json` is unpubl
 ## Evidence register
 
 Stage 0 documentation received local independent QA evidence at `_docs/evidence/iteration-0-qa.md` (implementation commit `4a06645`). Stage 1 received local independent QA PASS at `_docs/evidence/iteration-1-qa.md`, with 16 frontend tests and build evidence (implementation commit `156c8de`, tag `iteration-1-mock-verified`). B01 was reproduced, groomed, fixed and verified locally; `_docs/bugs.json` preserves evidence. GitHub publication remains pending; no external issue closures exist. Browser/visual QA and real Google handshake remain unverified. See `_docs/evidence/methodology-limitations.md` for bundled issue sequencing and external flow deviations. Stage 2 contract engineer validation is recorded separately; implementation stages require independent release gates.
+
+## Current verified checkpoints
+
+| Scope | Implementation | Independent QA | Evidence |
+|---|---|---|---|
+| Documentation | 4a06645 | Local PASS | iteration-0-qa.md |
+| Iteration 1 mock frontend | 156c8de | Local PASS, 16 tests | iteration-1-qa.md |
+| Iteration 2 contract | aee0377 | Local PASS; refined bounds rechecked during M08 | iteration-2-qa.md |
+| M07 memory auth | e41c3af | 2229a1e, 41 tests | iteration-3-M07-qa.md |
+| M08 memory CRUD | bdb554b | 414bf2c, 75 tests | iteration-3-M08-qa.md |
+| M09 memory reports | 7a67961 | f0bc882, 82 tests | iteration-3-M09-qa.md |
+
+Evidence filenames are relative to `_docs/evidence/`. Iteration 3 checkpoint tag is `iteration-3-memory-verified`. Counts reflect each observed checkpoint, not additive test totals. M10 schema/migrations is released; M11 repository replacement, process restart and full integration are not implied complete. GitHub publication remains pending. Browser visual QA and live Google OAuth handshake remain unverified; actual JWT cryptographic checks used mocked provider HTTP. Follow methodology-limitations.md for genuine external-flow and bundled-stage deviations.
