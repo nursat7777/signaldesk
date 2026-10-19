@@ -1,0 +1,39 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> signaldesk-frontend@1.0.0 test
+> vitest run --maxWorkers=1
+
+
+ RUN  v3.2.7 /workspace/scratch/d80c24dcf6f8/cometly-assignment/frontend
+
+/workspace/scratch/d80c24dcf6f8/cometly-assignment/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/d80c24dcf6f8/cometly-assignment/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+ ✓ src/http-workflows.test.tsx (3 tests) 5533ms
+   ✓ Real HTTP / SQLite / React workflows > administrator creates client and approved account then assigns existing marketer through actual forms  1193ms
+   ✓ Real HTTP / SQLite / React workflows > marketer creates campaign, enters and edits one daily record, viewer sees real report and cannot write/cross clients  1384ms
+/workspace/scratch/d80c24dcf6f8/cometly-assignment/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/d80c24dcf6f8/cometly-assignment/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+ ✓ src/qa.http-integration.test.tsx (2 tests) 4256ms
+   ✓ Independent QA actualHTTP SQLite workflow > admin creates campaign; marketer enters results; viewer reads own report only  1624ms
+ ✓ src/qa.interactions.test.tsx (5 tests) 3010ms
+   ✓ Independent QA principal UI acceptance > uses admin forms to create client and second marketer and assign two marketers  1071ms
+   ✓ Independent QA principal UI acceptance > viewer has own report and no mutation actions; Russian controls and empty filter work  385ms
+   ✓ Independent QA daily workflow > assigned marketer creates a day, reopens it and edits the same record  1300ms
+ ✓ src/engineer.test.tsx (3 tests) 1845ms
+   ✓ Engineer frontend verification > creates campaign and daily result through forms and loads same day for editing  1690ms
+ ✓ src/AuthGate.test.tsx (4 tests) 563ms
+ ✓ src/qa.api.test.tsx (4 tests) 257ms
+ ✓ src/qa.service.test.ts (10 tests) 242ms
+ ✓ src/api-service.test.ts (4 tests) 38ms
+
+ Test Files  8 passed (8)
+      Tests  35 passed (35)
+   Start at  17:27:46
+   Duration  23.98s (transform 318ms, setup 1.12s, collect 1.29s, tests 15.74s, environment 3.56s, prepare 690ms)
+
