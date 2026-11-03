@@ -51,3 +51,14 @@ Stage 0 documentation received local independent QA evidence at `_docs/evidence/
 | M13 integrated workflows | ebc54fe | 18c2464, 122 Python/35 frontend tests/build | iteration-5-M13-qa.md |
 
 Evidence filenames are relative to `_docs/evidence/`. Iteration 3 checkpoint tag is `iteration-3-memory-verified`. Counts reflect each observed checkpoint, not additive test totals. Iteration 4 checkpoint tag is `iteration-4-sqlite-verified`. Actual two-process Uvicorn restart preserved session token, version2 metrics and report. Iteration 5 checkpoint tag is `iteration-5-integration-verified`. M13 actual HTTP + React/jsdom workflows passed with committed raw logs. M14 setup/CI/local delivery audit is released; external GitHub delivery remains blocked. No further runtime features are in scope. GitHub publication remains pending. Browser visual QA and live Google OAuth handshake remain unverified; actual JWT cryptographic checks used mocked provider HTTP. Follow methodology-limitations.md for genuine external-flow and bundled-stage deviations.
+
+## Deployment assignment — 2026-11-03
+
+The user's explicit new scope supersedes the old SQLite-only completion boundary:
+PostgreSQL production, Docker/Compose, Playwright for all existing features,
+GitHub CI/CD and prepared hosting/CloudFormation. Prior prohibition on browser
+installation reflected an older environment; the user explicitly requires real
+Playwright now. Issues #20–#28 and #29–#45 were created before implementation.
+Bugs #46 and #47 record actual browser/API regressions before fixes.
+Checks in this phase are orchestrator self-verification, not independent QA.
+Keep Issues open while full PostgreSQL/Compose/cloud acceptance remains unverified.

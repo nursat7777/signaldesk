@@ -967,6 +967,7 @@ components:
           enum:
           - memory
           - sqlite
+          - postgresql
       required:
       - status
       - storage
