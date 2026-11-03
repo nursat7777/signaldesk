@@ -23,3 +23,13 @@ test-frontend:
 	cd frontend && npm test -- --maxWorkers=1
 test: test-backend test-frontend
 verify: test build
+
+test-integration:
+	$(VENV_PYTHON) -m pytest integration -q
+
+e2e:
+	npm run e2e
+
+lint:
+	$(VENV_PYTHON) -m ruff check --select E9,F63,F7,F82 backend scripts tests integration
+	cd frontend && npx tsc -b
