@@ -1,0 +1,4 @@
+# Disposable CI/test database only. Never use this override on production data.
+services:
+  db:
+    ports: ["127.0.0.1:55432:5432"]

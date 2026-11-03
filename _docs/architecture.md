@@ -37,3 +37,13 @@ SQLite file path is configurable and excluded from git. Alembic owns schema chan
 ## Reference and runtime decisions
 
 The orchestrator checked official FastAPI, SQLAlchemy, Prisma SQLite and Django documentation during stack selection. Hosted Sites runtime does not support this assignment's exact Python/SQLite workflow; use a local repository implementation and reproducible setup. No hosted deployment is claimed. Browser/visual QA and live OAuth constraints are recorded in testing-guidelines.md.
+
+## Production deployment extension — 2026-11-03
+
+Production Compose uses PostgreSQL through psycopg. The existing schema and
+Alembic history are unchanged and portable. FastAPI serves static React after
+API route registration; unknown API paths remain JSON 404 for every method.
+Health queries the database. See deployment.md for actual verification limits,
+non-root image, persistent network-isolated database, transactional legacy import,
+CI/CD and single-host CloudFormation architecture. SQLite remains a compatibility
+and migration source, not the production Compose database.

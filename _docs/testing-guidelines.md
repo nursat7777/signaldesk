@@ -23,3 +23,12 @@ Create issue with `user-test-bug`, exact reproduction, expected/actual behavior 
 ## Current environment limitations
 
 The required browser-control skill is unavailable in this managed container. Do not launch a browser preview, install a browser or improvise a browser fallback. Use actual frontend interaction tests through React Testing Library/jsdom and real-server HTTP end-to-end workflow checks. Explicitly report that browser/visual QA is not verified. Real Google OAuth credentials are absent; provider callback tests may mock the provider under clearly labeled isolated tests, but the live Google handshake remains unverified.
+
+## Current assignment override — 2026-11-03
+
+The user's new assignment explicitly requires Playwright. Pinned Chromium was
+installed and 17 scenarios executed against actual static frontend/FastAPI with
+SQLite compatibility storage; this replaces the old browser-unavailable restriction
+for this phase. PostgreSQL and Docker Compose must still pass actual CI checks.
+Provider authentication remains distinct from CLI-seeded server session tests.
+New evidence is orchestrator self-check evidence, not independent QA approval.

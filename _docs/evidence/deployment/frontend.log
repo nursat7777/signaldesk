@@ -1,0 +1,38 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> signaldesk-frontend@1.0.0 test
+> vitest run --maxWorkers=1
+
+
+ RUN  v3.2.7 /workspace/scratch/3aa6b25a9cf7/signaldesk-main/frontend
+
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+ ✓ src/http-workflows.test.tsx (3 tests) 4012ms
+   ✓ Real HTTP / SQLite / React workflows > administrator creates client and approved account then assigns existing marketer through actual forms  901ms
+   ✓ Real HTTP / SQLite / React workflows > marketer creates campaign, enters and edits one daily record, viewer sees real report and cannot write/cross clients  1023ms
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+ ✓ src/qa.http-integration.test.tsx (2 tests) 2922ms
+   ✓ Independent QA actualHTTP SQLite workflow > admin creates campaign; marketer enters results; viewer reads own report only  1026ms
+ ✓ src/qa.interactions.test.tsx (5 tests) 1523ms
+   ✓ Independent QA principal UI acceptance > uses admin forms to create client and second marketer and assign two marketers  655ms
+   ✓ Independent QA daily workflow > assigned marketer creates a day, reopens it and edits the same record  515ms
+ ✓ src/engineer.test.tsx (3 tests) 1198ms
+   ✓ Engineer frontend verification > creates campaign and daily result through forms and loads same day for editing  1071ms
+ ✓ src/AuthGate.test.tsx (4 tests) 331ms
+ ✓ src/qa.service.test.ts (10 tests) 176ms
+ ✓ src/qa.api.test.tsx (4 tests) 177ms
+ ✓ src/api-service.test.ts (4 tests) 27ms
+
+ Test Files  8 passed (8)
+      Tests  35 passed (35)
+   Start at  13:04:10
+   Duration  15.78s (transform 283ms, setup 670ms, collect 959ms, tests 10.37s, environment 2.31s, prepare 424ms)
+

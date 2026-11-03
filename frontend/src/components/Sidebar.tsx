@@ -56,6 +56,8 @@ export function Sidebar({
         ).map((k) => (
           <button
             key={k}
+            aria-label={t(k)}
+            title={t(k)}
             className={tab === k ? "nav active" : "nav"}
             onClick={() => setTab(k)}
           >
