@@ -1,8 +1,11 @@
 import secrets
+import os
+from pathlib import Path
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 from .auth import COOKIE, STATE_COOKIE, GoogleProvider, current_session, mutation_session
 from .core import ApiError, MemoryRepository, Settings, now, public_user, token_hash
@@ -40,6 +43,13 @@ def create_app(settings=None, repository=None):
 
     @app.get('/api/health', operation_id='health')
     def health():
+        if hasattr(repo, 'engine'):
+            from sqlalchemy import text
+            try:
+                with repo.engine.connect() as connection:
+                    connection.execute(text('SELECT 1'))
+            except Exception:
+                return JSONResponse({'status': 'unavailable', 'storage': repo.storage}, status_code=503)
         return {'status': 'ok', 'storage': repo.storage}
 
     @app.get('/api/auth/status', operation_id='authStatus')
@@ -106,5 +116,21 @@ def create_app(settings=None, repository=None):
     app.include_router(router())
     from .reporting import router as report_router
     app.include_router(report_router())
+    # Register after all API routes. Never turn unknown API paths into HTML.
+    static_dir = Path(os.getenv('STATIC_DIR', Path(__file__).resolve().parents[1] / 'frontend/dist')).resolve()
+    if (static_dir / 'index.html').is_file():
+        if (static_dir / 'assets').is_dir():
+            app.mount('/assets', StaticFiles(directory=static_dir / 'assets'), name='assets')
+
+        @app.api_route('/{path:path}', methods=['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], include_in_schema=False)
+        def frontend(path: str, request: Request):
+            if path == 'api' or path.startswith('api/'):
+                raise HTTPException(404, 'Not Found')
+            if request.method not in ('GET', 'HEAD'):
+                raise HTTPException(405, 'Method Not Allowed')
+            candidate = (static_dir / path).resolve()
+            if not candidate.is_relative_to(static_dir):
+                raise HTTPException(404, 'Not Found')
+            return FileResponse(candidate if candidate.is_file() else static_dir / 'index.html')
     return app
 

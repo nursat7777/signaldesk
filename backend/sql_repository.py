@@ -42,6 +42,7 @@ class SQLRepository:
     storage='sqlite'
     def __init__(self,url):
         self.engine=make_engine(url)
+        self.storage=self.engine.dialect.name
         self._local=local()
         self.lock=Transaction(self)
         tables=set(inspect(self.engine).get_table_names())
