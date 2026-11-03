@@ -1,0 +1,130 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> e2e
+> playwright test
+
+[2m[WebServer] [22m/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+[2m[WebServer] [22m  from ._compat import httpx2
+[2m[WebServer] [22m/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+[2m[WebServer] [22mIt will be compatible before version 2.0.0.
+[2m[WebServer] [22m  from authlib.jose import JsonWebToken
+[2m[WebServer] [22mINFO:     Started server process [1118]
+[2m[WebServer] [22mINFO:     Waiting for application startup.
+[2m[WebServer] [22mINFO:     Application startup complete.
+[2m[WebServer] [22mINFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+Running 17 tests using 1 worker
+
+(node:1120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   1 [chromium] › e2e/features.spec.ts:2:1 › E01 #29 authentication state and real session logout (1.3s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   2 [chromium] › e2e/features.spec.ts:21:1 › E02 #30 role navigation and cross-client denial (886ms)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   3 [chromium] › e2e/features.spec.ts:37:1 › E03 #31 create client and require name (1.9s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   4 [chromium] › e2e/features.spec.ts:66:1 › E04 #32 archive and restore client (1.6s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   5 [chromium] › e2e/features.spec.ts:96:1 › E05 #33 approve user and revoke access (2.0s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   6 [chromium] › e2e/features.spec.ts:129:1 › E06 #34 revoke and restore marketer assignment (1.6s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   7 [chromium] › e2e/features.spec.ts:160:1 › E07 #35 create campaign and validate required name (1.2s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   8 [chromium] › e2e/features.spec.ts:186:1 › E08 #36 archive and restore campaign (1.3s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓   9 [chromium] › e2e/features.spec.ts:212:1 › E09 #37 campaign search and no-match state (1.0s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  10 [chromium] › e2e/features.spec.ts:241:1 › E10 #38 daily values, validation and exact persisted money (1.3s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  11 [chromium] › e2e/features.spec.ts:261:1 › E11 #39 duplicate date loads row and increments version (1.5s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  12 [chromium] › e2e/features.spec.ts:277:1 › E12 #40 concurrent edits reject stale browser (2.4s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  13 [chromium] › e2e/features.spec.ts:302:1 › E13 #41 inclusive date filter, invalid range and reset (1.5s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  14 [chromium] › e2e/features.spec.ts:328:1 › E14 #42 totals and zero-denominator rendering (1.5s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  15 [chromium] › e2e/features.spec.ts:339:1 › E15 #43 channel comparison uses persisted totals (1.6s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  16 [chromium] › e2e/features.spec.ts:361:1 › E16 #44 language persistence and mobile navigation (1.6s)
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/.venv/lib/python3.12/site-packages/authlib/integrations/httpx_client/assertion_client.py:5: AuthlibDeprecationWarning: The httpx module is deprecated; please use httpx2 instead.
+  from ._compat import httpx2
+/workspace/scratch/3aa6b25a9cf7/signaldesk-main/backend/auth.py:6: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import JsonWebToken
+  ✓  17 [chromium] › e2e/features.spec.ts:392:1 › E17 #45 reload preserves database metric and session (1.8s)
+
+  17 passed (28.0s)
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m
