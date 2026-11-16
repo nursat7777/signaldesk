@@ -112,6 +112,7 @@ services:
     image: ${APP_IMAGE:-signaldesk-local}
     command: [python, -m, uvicorn, incident_agent.app:production_app, --factory, --host, 0.0.0.0, --port, '8080', --workers, '1', --no-access-log]
     environment:
+      APP_ENV: ${APP_ENV:?Set APP_ENV}
       INCIDENT_GITHUB_REPOSITORY: ${INCIDENT_GITHUB_REPOSITORY:-}
       INCIDENT_GITHUB_TOKEN: ${INCIDENT_GITHUB_TOKEN:-}
       ALERT_WEBHOOK_TOKEN: ${ALERT_WEBHOOK_TOKEN:?Set ALERT_WEBHOOK_TOKEN}
