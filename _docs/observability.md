@@ -143,7 +143,8 @@ service readiness.
 
 `ALERT_WEBHOOK_TOKEN` must be at least 32 characters and is passed to Alertmanager
 as a file secret. Payloads are limited to 32KiB and ten alerts. Only six known
-alert names and three known environments are accepted. Annotation URLs, commands,
+alert names and the responder deployment environment are accepted. Cross-environment
+payloads are rejected even with a valid token. Annotation URLs, commands,
 queries and provided fingerprints are ignored. All diagnostic URLs and queries
 are fixed; HTTP redirects are disabled, requests time out, diagnostic responses
 are capped at 64KiB. Raw logs are counted but never forwarded to GitHub or a model.
@@ -260,3 +261,13 @@ Primary references used: [OpenTelemetry Python exporters](https://opentelemetry.
 [Loki native OTLP](https://grafana.com/docs/loki/latest/send-data/otel/),
 [Alertmanager configuration](https://prometheus.io/docs/alerting/latest/configuration/),
 [Render prebuilt images](https://render.com/docs/deploying-an-image).
+
+### Current account verification — 2026-11-16
+
+GitHub environments now exist with develop/main branch restrictions and no
+credentials. A required-reviewer control is not exposed in this private repository
+settings UI; no upgrade was enabled. Render Google sign-in is verified, but its
+Hobby workspace has zero services and $0.00 credit balance. AWS console access
+returns Site Unavailable. No cloud credit eligibility, external deployment or
+real LLM call is claimed. See the evidence register for the successful real
+Docker/PostgreSQL/monitoring CI run and subsequent verification.
