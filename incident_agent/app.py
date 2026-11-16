@@ -31,6 +31,9 @@ class Responder:
         if len(token) < 32:
             raise ValueError('Webhook token must have at least 32 characters')
         self.token = token
+        self.environment = os.getenv('APP_ENV', 'test')
+        if self.environment not in ('development', 'production', 'test'):
+            raise ValueError('Invalid responder environment')
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.execute('CREATE TABLE IF NOT EXISTS incidents (key TEXT PRIMARY KEY, status TEXT, issue INTEGER, updated REAL, report TEXT)')
@@ -110,7 +113,7 @@ class Responder:
         labels = alert.get('labels', {})
         name = labels.get('alertname')
         env = labels.get('deployment_environment_name')
-        if name not in ALERTS or env not in ('development', 'production', 'test'):
+        if name not in ALERTS or env != self.environment:
             raise ValueError('Unknown alert or environment')
         status = alert.get('status')
         if status not in ('firing', 'resolved'):
