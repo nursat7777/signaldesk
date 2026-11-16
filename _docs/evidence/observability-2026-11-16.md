@@ -37,3 +37,27 @@ until their full acceptance criteria and external gates are satisfied.
 Historical prior CI success for the previous application Docker/PostgreSQL
 extension does not certify the new monitoring overlay. Real Google OAuth
 application sign-in remains distinct from test session fixtures and GitHub login.
+
+## Executed GitHub Actions verification
+
+[PR CI run43917634351](https://github.com/nursat7777/signaldesk/actions/runs/43917634351)
+for source2b878476c477bd083810084af21a6a5e54fac9dc completed successfully.
+It built and started the actual application image, ran PostgreSQL integration,
+all17 Chromium journeys and real restart persistence, validated CloudFormation,
+started every monitoring service and passed private OTLP/Prometheus/PostgreSQL/
+Tempo/Loki/Grafana readiness checks. Actual Alertmanager firing and recovery
+notifications reached the authenticated persistent responder. Development deployment
+was correctly skipped because the source was a PR, not develop. This certifies
+the tested source, not a hosted deployment. Later strengthening changes require
+their own green run before merge.
+
+Bug #66 reproduced Playwright1.56.1 rejecting the new ubuntu26.04 runner.
+Pinning Ubuntu24.04 restored dependency installation and the full regression.
+
+Live account observations: GitHub environments development and production were
+created and restricted respectively to develop and main. Both have no secrets.
+The environment settings UI did not expose a required-reviewer control. Render
+Google sign-in succeeded; My Workspace has no services, uses Hobby, and shows
+credit balance$0.00. AWS console returned Site Unavailable; no account credits
+or billing eligibility could be verified. AWS Core was offered but its connection
+is not confirmed. No paid resources were provisioned.
