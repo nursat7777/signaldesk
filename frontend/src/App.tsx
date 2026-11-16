@@ -80,7 +80,9 @@ export function App({
     [entryDate, setEntryDate] = useState(today()),
     [values, setValues] = useState<Record<string, string>>({}),
     [version, setVersion] = useState<number | undefined>(),
-    [saving, setSaving] = useState(false);
+    [saving, setSaving] = useState(false),
+    [metricLoading, setMetricLoading] = useState(false),
+    [metricLoadFailed, setMetricLoadFailed] = useState(false);
   const client = clients.find((c) => c.id === selected),
     canWrite = me?.role !== "client";
   const money = (n: number) =>
@@ -152,6 +154,11 @@ export function App({
   useEffect(() => {
     if (modal !== "metric" || !currentCampaign) return;
     let active = true;
+    setMetricLoading(true);
+    setMetricLoadFailed(false);
+    setVersion(undefined);
+    setValues({});
+    setError("");
     api
       .listMetrics(selected, entryDate, entryDate)
       .then((rows) => {
@@ -164,7 +171,13 @@ export function App({
           ),
         );
       })
-      .catch(fail);
+      .catch((e) => {
+        if (active) {
+          setMetricLoadFailed(true);
+          fail(e);
+        }
+      })
+      .finally(() => active && setMetricLoading(false));
     return () => {
       active = false;
     };
@@ -187,7 +200,12 @@ export function App({
   const openMetric = (id?: string) => {
     setError("");
     setNotice("");
-    setCurrentCampaign(id || campaigns.find((c) => !c.archived)?.id || "");
+    const campaign = id || campaigns.find((c) => !c.archived)?.id || "";
+    setCurrentCampaign(campaign);
+    setMetricLoading(Boolean(campaign));
+    setMetricLoadFailed(false);
+    setValues({});
+    setVersion(undefined);
     setEntryDate(today());
     setModal("metric");
   };
@@ -731,6 +749,7 @@ export function App({
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
+                  if (metricLoading || metricLoadFailed || saving) return;
                   if (
                     metricKeys.some(
                       (k) => values[k] === undefined || values[k].trim() === "",
@@ -758,7 +777,10 @@ export function App({
                       aria-label={t("campaign")}
                       required
                       value={currentCampaign}
-                      onChange={(e) => setCurrentCampaign(e.target.value)}
+                      onChange={(e) => {
+                        setMetricLoading(true);
+                        setCurrentCampaign(e.target.value);
+                      }}
                     >
                       <option value="">—</option>
                       {campaigns
@@ -778,7 +800,10 @@ export function App({
                       required
                       max={today()}
                       value={entryDate}
-                      onChange={(e) => setEntryDate(e.target.value)}
+                      onChange={(e) => {
+                        setMetricLoading(true);
+                        setEntryDate(e.target.value);
+                      }}
                     />,
                   )}
                 </div>
@@ -788,7 +813,7 @@ export function App({
                   ) : (
                     <Plus size={15} />
                   )}{" "}
-                  {t(version !== undefined ? "existing" : "newRecord")}
+                  {t(metricLoading ? "loadingRecord" : version !== undefined ? "existing" : "newRecord")}
                 </div>
                 <div className="form-grid">
                   {metricKeys.map((k) =>
@@ -800,6 +825,7 @@ export function App({
                       <input
                         key={k}
                         aria-label={t(k)}
+                        disabled={metricLoading || metricLoadFailed || saving}
                         type="number"
                         min="0"
                         max={
@@ -823,7 +849,7 @@ export function App({
                   </button>
                   <button
                     className="primary"
-                    disabled={saving || !currentCampaign}
+                    disabled={saving || metricLoading || metricLoadFailed || !currentCampaign}
                   >
                     {t("save")}
                   </button>

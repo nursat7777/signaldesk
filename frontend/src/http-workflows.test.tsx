@@ -99,6 +99,7 @@ describe("Real HTTP / SQLite / React workflows", () => {
       await screen.findByRole("button", { name: "Add daily results" }),
     );
     d = screen.getByRole("dialog");
+    await waitFor(() => expect(within(d).getByLabelText("Ad spend")).toBeEnabled());
     for (const [label, value] of [
       ["Ad spend", "10.25"],
       ["Impressions", "100"],
