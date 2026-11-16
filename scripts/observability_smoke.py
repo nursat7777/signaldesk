@@ -1,5 +1,8 @@
 """Actual stack checks; run inside app container on the private telemetry network."""
 import json
+import os
+import hashlib
+from datetime import datetime, timedelta, timezone
 import time
 import urllib.parse
 import urllib.request
@@ -42,6 +45,32 @@ def main():
             if attempt == 44:
                 raise
             time.sleep(2)
+    if os.getenv('APP_ENV') == 'test':
+        # Disposable CI only. Exercise actual Alertmanager -> authenticated responder.
+        token = os.environ['ALERT_WEBHOOK_TOKEN']
+        key = hashlib.sha256(b'test:HighErrorRate').hexdigest()
+        start = datetime.now(timezone.utc)-timedelta(minutes=1)
+        def send_alert(end):
+            payload = [{'labels': {'alertname': 'HighErrorRate', 'deployment_environment_name': 'test', 'severity': 'warning'}, 'startsAt': start.isoformat(), 'endsAt': end.isoformat()}]
+            request = urllib.request.Request('http://alertmanager:9093/api/v2/alerts', data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(request, timeout=5):
+                pass
+        def wait_status(expected):
+            for attempt in range(30):
+                request = urllib.request.Request('http://incident-agent:8080/incidents', headers={'Authorization': 'Bearer '+token})
+                with urllib.request.urlopen(request, timeout=5) as response:
+                    rows = json.load(response)
+                matching = [r for r in rows if r['key'] == key]
+                if matching and matching[0]['status'] == expected:
+                    return matching[0]
+                time.sleep(2)
+            raise RuntimeError('Actual notification route did not deliver '+expected)
+        send_alert(datetime.now(timezone.utc)+timedelta(minutes=5))
+        firing = wait_status('firing')
+        send_alert(datetime.now(timezone.utc))
+        resolved = wait_status('resolved')
+        assert firing['key'] == resolved['key']
+        print('PASS: actual Alertmanager firing/recovery webhook delivery to persistent responder')
     print('PASS: private OTLP pipelines, Prometheus application/PostgreSQL metrics, trace, Loki logs and Grafana readiness')
 
 
