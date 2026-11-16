@@ -1,6 +1,7 @@
 import secrets
 import os
 from pathlib import Path
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,14 +12,26 @@ from .auth import COOKIE, STATE_COOKIE, GoogleProvider, current_session, mutatio
 from .core import ApiError, MemoryRepository, Settings, now, public_user, token_hash
 
 
-def create_app(settings=None, repository=None):
+def create_app(settings=None, repository=None, telemetry=None):
     settings = settings or Settings.from_env()
     if repository is None:
         from .sql_repository import SQLRepository
         repository = SQLRepository(settings.database_url)
     repo = repository
     repo.bootstrap(settings.bootstrap_admin_email)
-    app = FastAPI(title='SignalDesk', version='1.0.0')
+    from .telemetry import Telemetry, TelemetryMiddleware
+    telemetry = telemetry or Telemetry()
+    @asynccontextmanager
+    async def lifespan(app):
+        try:
+            yield
+        finally:
+            telemetry.shutdown()
+    app = FastAPI(title='SignalDesk', version='1.0.0', lifespan=lifespan)
+    app.state.telemetry = telemetry
+    if hasattr(repo, 'engine'):
+        telemetry.instrument_database(repo.engine)
+    app.add_middleware(TelemetryMiddleware, telemetry=telemetry)
     app.state.repo, app.state.settings, app.state.oauth_provider = repo, settings, GoogleProvider()
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins), allow_credentials=True,
                        allow_methods=['GET', 'POST', 'PUT', 'PATCH'],
