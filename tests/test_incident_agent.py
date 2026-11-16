@@ -37,6 +37,7 @@ def test_auth_validation_limits(tmp_path, monkeypatch):
     headers = {'Authorization': 'Bearer '+TOKEN}
     assert c.post('/alerts', json=alert(name='ArbitraryCommand'), headers=headers).status_code == 422
     assert c.post('/alerts', json=alert(env='evil'), headers=headers).status_code == 422
+    assert c.post('/alerts', json=alert(env='production'), headers=headers).status_code == 422
     assert c.post('/alerts', content='x'*32769, headers=headers).status_code == 413
     assert not requests
 
