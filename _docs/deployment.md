@@ -180,3 +180,11 @@ explicit approval before deleting retained infrastructure.
 - Missing browser: install pinned Playwright; unrun checks are not passes.
 - Docker/user namespace unavailable: run on a supported runner; keep acceptance
   open until real Compose and PostgreSQL tests execute.
+
+## Superseding deployment controls — 2026-11-16
+
+The earlier automatic main-to-Render job is replaced by develop-only tested-image
+deployment and manual production digest promotion. Use [observability.md](observability.md)
+for current environment isolation, migration/backup gates, telemetry and incident
+operations. Earlier local limitations describe that historical checkpoint. No
+new hosted deployment is claimed without executed evidence.
