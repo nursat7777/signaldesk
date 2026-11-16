@@ -154,6 +154,14 @@ def create_app(responder):
             responder.db.execute('SELECT 1')
         return {'status': 'ok'}
 
+    @app.get('/incidents')
+    def incidents(request: Request):
+        if not hmac.compare_digest(request.headers.get('authorization', ''), 'Bearer '+responder.token):
+            raise HTTPException(401, 'Unauthorized')
+        with responder.lock:
+            rows = responder.db.execute('SELECT key,status,issue,updated FROM incidents ORDER BY updated DESC LIMIT 50').fetchall()
+        return [{'key': r[0], 'status': r[1], 'issue': r[2], 'updated': r[3]} for r in rows]
+
     @app.post('/alerts')
     async def alerts(request: Request):
         if not hmac.compare_digest(request.headers.get('authorization', ''), 'Bearer '+responder.token):
