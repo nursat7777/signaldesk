@@ -64,6 +64,10 @@ jobs:
           docker compose ps
           curl --fail --retry 10 --retry-delay 3 http://localhost:8000/api/health
           curl --fail http://localhost:8000/ | grep -q 'id="root"'
+      - name: Enable monitoring before integration and business browser journeys
+        run: |
+          docker compose -f compose.yaml -f compose.test.yaml -f compose.observability.yaml config --quiet
+          docker compose -f compose.yaml -f compose.test.yaml -f compose.observability.yaml up -d --build --wait --wait-timeout 240
       - name: PostgreSQL migrations, CRUD, import, constraints and authorization
         run: .venv/bin/pytest integration -q --junitxml=integration-results.xml
       - name: Playwright all features against actual Compose and PostgreSQL
@@ -76,9 +80,7 @@ jobs:
           .venv/bin/python -m scripts.restart_check verify
       - name: Run actual observability stack and verify correlated data
         run: |
-          docker compose -f compose.yaml -f compose.observability.yaml config --quiet
-          docker compose -f compose.yaml -f compose.observability.yaml up -d --build --wait --wait-timeout 240
-          docker compose exec -T -e ALERT_WEBHOOK_TOKEN app python /app/observability_smoke.py
+          docker compose exec -T -e ALERT_WEBHOOK_TOKEN -e GRAFANA_ADMIN_PASSWORD app python /app/observability_smoke.py
       - name: Preserve the exact tested application image
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
