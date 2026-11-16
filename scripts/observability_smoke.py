@@ -2,6 +2,7 @@
 import json
 import os
 import hashlib
+import base64
 from datetime import datetime, timedelta, timezone
 import time
 import urllib.parse
@@ -37,6 +38,17 @@ def main():
             pg = json.loads(get('http://prometheus:9090/api/v1/query?query=pg_up'))
             assert any(float(r['value'][1]) == 1 for r in pg['data']['result']), 'Database exporter unavailable'
             assert get('http://tempo:3200/api/traces/'+trace_id), 'Missing correlated trace'
+            if os.getenv('APP_ENV') == 'test':
+                for operation in ('client_create', 'campaign_create', 'daily_metric_save', 'report_generate', 'user_create'):
+                    query = urllib.parse.urlencode({'query': 'sum(signaldesk_'+operation+'_total{outcome="success"})'})
+                    result = json.loads(get('http://prometheus:9090/api/v1/query?'+query))['data']['result']
+                    assert result and float(result[0]['value'][1]) > 0, 'Missing real business metric: '+operation
+                auth = base64.b64encode(('admin:'+os.environ['GRAFANA_ADMIN_PASSWORD']).encode()).decode()
+                request = urllib.request.Request('http://grafana:3000/api/dashboards/uid/signaldesk-operations', headers={'Authorization': 'Basic '+auth})
+                with urllib.request.urlopen(request, timeout=5) as response:
+                    dashboard = json.load(response)['dashboard']
+                assert len(dashboard['panels']) >= 15, 'Grafana dashboard provisioning failed'
+
             log_query = urllib.parse.urlencode({'query': '{service_name="signaldesk"}', 'limit': 10})
             logs = json.loads(get('http://loki:3100/loki/api/v1/query_range?'+log_query))
             assert logs['data']['result'], 'No structured application logs'
