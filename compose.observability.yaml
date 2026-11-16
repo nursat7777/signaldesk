@@ -1,0 +1,146 @@
+# Overlay on compose.yaml. All telemetry ports stay private; only Grafana is loopback.
+services:
+  app:
+    environment:
+      APP_ENV: ${APP_ENV:?Set APP_ENV}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+    networks: [default, telemetry]
+  db:
+    networks: [default, telemetry]
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.165.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: [./observability/collector.yaml:/etc/otelcol/config.yaml:ro]
+    networks: [telemetry]
+    mem_limit: 256m
+    cpus: 0.5
+    restart: unless-stopped
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: [--config.file=/etc/prometheus/prometheus.yaml, --storage.tsdb.retention.time=7d, --storage.tsdb.retention.size=1GB]
+    volumes:
+      - ${PROMETHEUS_CONFIG:?Set environment-specific PROMETHEUS_CONFIG}:/etc/prometheus/prometheus.yaml:ro
+      - ./observability/alerts.yaml:/etc/prometheus/alerts.yaml:ro
+      - prometheus-data:/prometheus
+    networks: [telemetry]
+    mem_limit: 384m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9090/-/ready]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command: [--config.file=/etc/alertmanager/alertmanager.yaml, --storage.path=/alertmanager]
+    volumes:
+      - ./observability/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro
+      - alertmanager-data:/alertmanager
+    secrets: [alert_webhook_token]
+    networks: [telemetry]
+    mem_limit: 128m
+    cpus: 0.25
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9093/-/ready]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+  blackbox:
+    image: prom/blackbox-exporter:v0.27.0
+    command: [--config.file=/etc/blackbox/blackbox.yaml]
+    volumes: [./observability/blackbox.yaml:/etc/blackbox/blackbox.yaml:ro]
+    networks: [telemetry]
+    mem_limit: 64m
+    cpus: 0.25
+    restart: unless-stopped
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.1
+    environment:
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-signaldesk}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-signaldesk}?sslmode=disable
+    networks: [telemetry]
+    mem_limit: 64m
+    cpus: 0.25
+    restart: unless-stopped
+  tempo:
+    image: grafana/tempo:2.8.2
+    command: [-config.file=/etc/tempo.yaml]
+    volumes: [./observability/tempo.yaml:/etc/tempo.yaml:ro, tempo-data:/var/tempo]
+    networks: [telemetry]
+    mem_limit: 384m
+    cpus: 0.5
+    restart: unless-stopped
+  loki:
+    image: grafana/loki:3.5.7
+    command: [-config.file=/etc/loki/local-config.yaml]
+    volumes: [./observability/loki.yaml:/etc/loki/local-config.yaml:ro, loki-data:/loki]
+    networks: [telemetry]
+    mem_limit: 384m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3100/ready]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+  grafana:
+    image: grafana/grafana:12.2.1
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD}
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+    ports: [127.0.0.1:${GRAFANA_PORT:-3000}:3000]
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks: [telemetry]
+    mem_limit: 256m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:3000/api/health]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+  incident-agent:
+    build: .
+    image: ${APP_IMAGE:-signaldesk-local}
+    command: [python, -m, uvicorn, incident_agent.app:production_app, --factory, --host, 0.0.0.0, --port, '8080', --workers, '1', --no-access-log]
+    environment:
+      INCIDENT_GITHUB_REPOSITORY: ${INCIDENT_GITHUB_REPOSITORY:-}
+      INCIDENT_GITHUB_TOKEN: ${INCIDENT_GITHUB_TOKEN:-}
+      ALERT_WEBHOOK_TOKEN: ${ALERT_WEBHOOK_TOKEN:?Set ALERT_WEBHOOK_TOKEN}
+      INCIDENT_LLM_APPROVED: 'false'
+    volumes: [incident-data:/data]
+    networks: [telemetry, incident-egress]
+    read_only: true
+    tmpfs: [/tmp]
+    user: '10001:10001'
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 192m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+networks:
+  telemetry:
+    internal: true
+  incident-egress: {}
+volumes:
+  prometheus-data:
+  alertmanager-data:
+  tempo-data:
+  loki-data:
+  grafana-data:
+  incident-data:
+secrets:
+  alert_webhook_token:
+    environment: ALERT_WEBHOOK_TOKEN

@@ -17,9 +17,12 @@ RUN groupadd --gid 10001 app && useradd --uid 10001 --gid app --no-create-home a
 WORKDIR /app
 COPY --from=dependencies /opt/venv /opt/venv
 COPY backend/ backend/
+COPY incident_agent/ incident_agent/
+RUN mkdir /data && chown app:app /data
 COPY alembic.ini ./
 COPY --from=frontend /build/dist frontend/dist/
 COPY scripts/start.sh /app/start.sh
+COPY scripts/observability_smoke.py /app/observability_smoke.py
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4)"]

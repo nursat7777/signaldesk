@@ -53,3 +53,16 @@ make test-integration
 
 Maintained REST contract: _docs/openapi.yml. Advertising integrations/attribution
 remain deferred. No production test-login endpoint exists.
+
+## Deployment and observability extension — 2026-11-16
+
+Issues #49–#65 track isolated development/production, immutable manual promotion,
+OpenTelemetry, private Prometheus/Grafana/Tempo/Loki, six alert rules and a bounded
+read-only incident responder. See [_docs/observability.md](_docs/observability.md)
+for setup, metrics, alert testing, credentials, CI, backup, rollback and exact
+external deployment blockers. Production no longer deploys automatically from main.
+
+This extension preserves the existing application and PostgreSQL schema.
+Real LLM calls remain disabled until separate cost approval. No new live deployment
+is claimed. Executed verification is recorded in
+[_docs/evidence/observability-2026-11-16.md](_docs/evidence/observability-2026-11-16.md).

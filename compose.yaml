@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+    image: ${APP_IMAGE:-signaldesk-local}
     ports:
       - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8000}:8000"
     environment:
