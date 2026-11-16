@@ -33,6 +33,7 @@ def build(tmp_path, monkeypatch, github=False):
 def test_auth_validation_limits(tmp_path, monkeypatch):
     c, r, requests = build(tmp_path, monkeypatch)
     assert c.post('/alerts', json=alert()).status_code == 401
+    assert c.get('/incidents').status_code == 401
     headers = {'Authorization': 'Bearer '+TOKEN}
     assert c.post('/alerts', json=alert(name='ArbitraryCommand'), headers=headers).status_code == 422
     assert c.post('/alerts', json=alert(env='evil'), headers=headers).status_code == 422
