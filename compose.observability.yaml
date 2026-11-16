@@ -35,7 +35,7 @@ services:
     image: prom/alertmanager:v0.28.1
     command: [--config.file=/etc/alertmanager/alertmanager.yaml, --storage.path=/alertmanager]
     volumes:
-      - ./observability/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro
+      - ${ALERTMANAGER_CONFIG:-./observability/alertmanager.yaml}:/etc/alertmanager/alertmanager.yaml:ro
       - alertmanager-data:/alertmanager
     secrets: [alert_webhook_token]
     networks: [telemetry]
@@ -92,10 +92,11 @@ services:
       GF_USERS_ALLOW_SIGN_UP: 'false'
       GF_ANALYTICS_REPORTING_ENABLED: 'false'
       GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
-    ports: [127.0.0.1:${GRAFANA_PORT:-3000}:3000]
+    ports: ["127.0.0.1:${GRAFANA_PORT:-3000}:3000"]
     volumes:
-      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./observability/datasources.yaml:/etc/grafana/provisioning/datasources/signaldesk.yaml:ro
+      - ./observability/dashboard-provider.yaml:/etc/grafana/provisioning/dashboards/signaldesk.yaml:ro
+      - ./observability/dashboard.json:/var/lib/grafana/dashboards/signaldesk.json:ro
       - grafana-data:/var/lib/grafana
     networks: [telemetry]
     mem_limit: 256m
