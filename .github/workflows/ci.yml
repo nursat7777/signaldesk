@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       POSTGRES_USER: signaldesk
@@ -117,7 +117,7 @@ jobs:
     concurrency:
       group: development-deploy
       cancel-in-progress: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: development
     timeout-minutes: 25
     steps:

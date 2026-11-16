@@ -16,7 +16,7 @@ concurrency:
 jobs:
   validate:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       image: ${{ steps.guard.outputs.image }}
       sha: ${{ steps.guard.outputs.sha }}
@@ -39,7 +39,7 @@ jobs:
         run: python -m scripts.promote_receipt
   production:
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     timeout-minutes: 25
     steps:
