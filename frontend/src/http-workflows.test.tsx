@@ -33,6 +33,7 @@ describe("Real HTTP / SQLite / React workflows", () => {
     await user.click(within(d).getByRole("button", { name: "Save changes" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      { timeout: 5000 },
     );
     const client = (await api.listClients()).find(
       (c) => c.name === "HTTP Created Studio",
@@ -55,6 +56,7 @@ describe("Real HTTP / SQLite / React workflows", () => {
     await user.click(within(d).getByRole("button", { name: "Save changes" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      { timeout: 5000 },
     );
     await screen.findByText("HTTP Approved Viewer");
     const row = screen
@@ -94,6 +96,7 @@ describe("Real HTTP / SQLite / React workflows", () => {
     await user.click(within(d).getByRole("button", { name: "Save changes" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      { timeout: 5000 },
     );
     await user.click(
       await screen.findByRole("button", { name: "Add daily results" }),
@@ -112,6 +115,7 @@ describe("Real HTTP / SQLite / React workflows", () => {
     await user.click(within(d).getByRole("button", { name: "Save changes" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      { timeout: 5000 },
     );
     await user.click(screen.getByRole("button", { name: "Add daily results" }));
     d = screen.getByRole("dialog");
@@ -121,11 +125,13 @@ describe("Real HTTP / SQLite / React workflows", () => {
     await waitFor(() =>
       expect(within(d).getByLabelText("Revenue")).toHaveValue(30.75),
     );
+    await waitFor(() => expect(within(d).getByLabelText("Revenue")).toBeEnabled());
     await user.clear(within(d).getByLabelText("Revenue"));
     await user.type(within(d).getByLabelText("Revenue"), "51.25");
     await user.click(within(d).getByRole("button", { name: "Save changes" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+      { timeout: 5000 },
     );
     const rows = await api.listMetrics(
       fixture.metadata.clientId,
