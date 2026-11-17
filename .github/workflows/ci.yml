@@ -1,4 +1,4 @@
-name: Verify and deploy SignalDesk
+name: Verify SignalDesk
 on:
   push:
   pull_request:
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       POSTGRES_USER: signaldesk
@@ -18,6 +18,11 @@ jobs:
       TEST_DATABASE_URL: postgresql+psycopg://signaldesk:local_test_password@127.0.0.1:55432/signaldesk_test
       E2E_TEST_DATABASE_URL: postgresql+psycopg://signaldesk:local_test_password@127.0.0.1:55432/signaldesk_test
       E2E_BASE_URL: http://localhost:8000
+      APP_ENV: test
+      PROMETHEUS_CONFIG: ./observability/prometheus.yaml
+      ALERTMANAGER_CONFIG: ./observability/alertmanager.test.yaml
+      GRAFANA_ADMIN_PASSWORD: disposable-ci-grafana-password
+      ALERT_WEBHOOK_TOKEN: disposable-ci-alert-token-at-least-32-characters
     steps:
       - uses: actions/checkout@v7
         with:
@@ -48,6 +53,10 @@ jobs:
         run: make verify
       - name: Validate CloudFormation
         run: .venv/bin/cfn-lint infra/cloudformation.yaml
+      - name: Validate observability components and controlled alert firing/recovery
+        run: |
+          docker run --rm -v "$PWD/observability:/work:ro" -w /work --entrypoint promtool prom/prometheus:v3.5.0 test rules alert-tests.yaml
+          docker run --rm -v "$PWD/observability/collector.yaml:/config.yaml:ro" otel/opentelemetry-collector-contrib:0.165.0 validate --config=/config.yaml
       - name: Build and start actual Compose stack
         run: |
           docker compose -f compose.yaml -f compose.test.yaml config --quiet
@@ -55,16 +64,34 @@ jobs:
           docker compose ps
           curl --fail --retry 10 --retry-delay 3 http://localhost:8000/api/health
           curl --fail http://localhost:8000/ | grep -q 'id="root"'
+      - name: Enable monitoring before integration and business browser journeys
+        run: |
+          docker compose -f compose.yaml -f compose.test.yaml -f compose.observability.yaml config --quiet
+          docker compose -f compose.yaml -f compose.test.yaml -f compose.observability.yaml up -d --build --wait --wait-timeout 240
       - name: PostgreSQL migrations, CRUD, import, constraints and authorization
         run: .venv/bin/pytest integration -q --junitxml=integration-results.xml
       - name: Playwright all features against actual Compose and PostgreSQL
         run: npm run e2e
+      - name: Run actual observability stack and verify correlated data
+        run: |
+          docker compose exec -T -e ALERT_WEBHOOK_TOKEN -e GRAFANA_ADMIN_PASSWORD app python /app/observability_smoke.py
       - name: Verify actual application restart persistence
         run: |
           .venv/bin/python -m scripts.restart_check prepare
           docker compose restart app
           for i in $(seq 1 30); do curl --fail --silent http://localhost:8000/api/health && break; sleep 2; done
           .venv/bin/python -m scripts.restart_check verify
+      - name: Preserve the exact tested application image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          docker tag signaldesk-local signaldesk-verified
+          docker save signaldesk-verified -o verified-image.tar
+      - uses: actions/upload-artifact@v7
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        with:
+          name: verified-image
+          path: verified-image.tar
+          retention-days: 7
       - name: Collect container logs
         if: always()
         run: docker compose logs --no-color > compose-test.log
@@ -80,24 +107,63 @@ jobs:
           retention-days: 7
       - name: Remove only disposable CI resources
         if: always()
-        run: docker compose -f compose.yaml -f compose.test.yaml down -v
-  deploy-render:
+        run: docker compose -f compose.yaml -f compose.test.yaml -f compose.observability.yaml down -v
+  development:
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_TARGET == 'render'
-    runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 20
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+      deployments: write
+    concurrency:
+      group: development-deploy
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    environment: development
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.12'
-      - name: Deploy verified commit and await public health
+      - name: Download image already tested by CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name verified-image --dir image
+      - name: Publish the tested image
+        id: image
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          docker load -i image/verified-image.tar
+          REGISTRY_IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag signaldesk-verified "$REGISTRY_IMAGE:$SOURCE_SHA"
+          docker push "$REGISTRY_IMAGE:$SOURCE_SHA"
+          DIGEST=$(docker inspect --format '{{index .RepoDigests 0}}' "$REGISTRY_IMAGE:$SOURCE_SHA")
+          echo "image=$DIGEST" >> "$GITHUB_OUTPUT"
+      - name: Deploy development and verify HTTPS
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
           LIVE_URL: ${{ vars.LIVE_URL }}
-          DEPLOY_COMMIT: ${{ github.sha }}
+          DEPLOY_IMAGE: ${{ steps.image.outputs.image }}
         run: python -m scripts.deploy_render
+      - name: Record verified development receipt
+        env:
+          IMAGE: ${{ steps.image.outputs.image }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path('development.json').write_text(json.dumps({'environment':'development','image':os.environ['IMAGE'],'sha':os.environ['SOURCE_SHA'],'run_id':int(os.environ['GITHUB_RUN_ID']),'smoke_passed':True}))
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: development-verified
+          path: development.json
+          retention-days: 30

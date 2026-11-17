@@ -1,0 +1,22 @@
+global:
+  resolve_timeout: 5m
+route:
+  receiver: incident-agent
+  group_by: [alertname, deployment_environment_name]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+receivers:
+  - name: incident-agent
+    webhook_configs:
+      - url: http://incident-agent:8080/alerts
+        send_resolved: true
+        max_alerts: 10
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: /run/secrets/alert_webhook_token
+inhibit_rules:
+  - source_matchers: ['alertname="DatabaseUnavailable"']
+    target_matchers: ['alertname="ApplicationUnavailable"']
+    equal: [deployment_environment_name]

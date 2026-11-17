@@ -58,6 +58,7 @@ export const en = {
   assigned: "Assigned clients",
   assign: "Save assignments",
   loading: "Loading workspace…",
+  loadingRecord: "Loading daily record…",
   demo: "DEVELOPMENT PREVIEW · MOCK DATA",
   demoHint: "Demo identity",
   demoNotice:
@@ -165,6 +166,7 @@ export const ru: Record<keyof typeof en, string> = {
   assigned: "Назначенные клиенты",
   assign: "Сохранить назначения",
   loading: "Загрузка…",
+  loadingRecord: "Загрузка дневной записи…",
   demo: "РЕЖИМ РАЗРАБОТКИ · ТЕСТОВЫЕ ДАННЫЕ",
   demoHint: "Тестовый аккаунт",
   demoNotice:

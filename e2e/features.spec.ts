@@ -107,11 +107,24 @@ test('E13 #41 inclusive date filter, invalid range and reset',async({page,login}
   await page.getByRole('button',{name:'Last 30 days',exact:true}).click();
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
-test('E14 #42 totals and zero-denominator rendering',async({page,login})=>{
+test('E14 #42 totals and zero-denominator rendering',async({page,login,data})=>{
   await login();await expect(page.locator('.kpi-value').last()).toHaveText('—');
   await entry(page);await save(page);
   await expect(page.locator('.kpi-value').first()).toContainText('12.34');
   await expect(page.locator('.kpi-value').last()).toContainText('3');
+  // Verify the real report API against the same persisted values shown in the UI.
+  const reportPath=`/api/clients/${data.clientId}/report?from=2000-01-01&to=2099-12-31`;
+  const response=await page.request.get(reportPath);
+  expect(response.status()).toBe(200);
+  const report=await response.json();
+  expect(report.totals.spend).toBe('12.34');
+  expect(report.totals.revenue).toBe('37.02');
+  expect(report.totals.roas).toBe(3);
+  expect(report.daily).toHaveLength(1);
+  expect((await page.request.get(`/api/clients/${data.clientId}/report?from=2001-01-01&to=2000-01-01`)).status()).toBe(422);
+  await login('client');
+  expect((await page.request.get(reportPath)).status()).toBe(200);
+  expect((await page.request.get(`/api/clients/${data.otherId}/report?from=2000-01-01&to=2099-12-31`)).status()).toBe(403);
 });
 test('E15 #43 channel comparison uses persisted totals',async({page,login})=>{
   await login();await entry(page);await save(page);await page.getByRole('button',{name:'Channels',exact:true}).click();

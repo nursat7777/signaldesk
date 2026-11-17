@@ -1,14 +1,21 @@
 """Deploy only the verified commit. Never log authorization or response secrets."""
 import json
 import os
+import re
 import time
 import urllib.request
 
 service = os.environ['RENDER_SERVICE_ID']
 key = os.environ['RENDER_API_KEY']
-commit = os.environ['DEPLOY_COMMIT']
+image = os.environ['DEPLOY_IMAGE']
+if not re.fullmatch(r'ghcr.io/[a-z0-9_.-]+/[a-z0-9_.-]+@sha256:[a-f0-9]{64}', image):
+    raise ValueError('Deployment requires immutable GHCR image digest')
+if not re.fullmatch(r'srv-[A-Za-z0-9]+', service):
+    raise ValueError('Invalid Render service ID')
 base = os.environ['LIVE_URL'].rstrip('/')
-if not base.startswith('https://'):
+from urllib.parse import urlparse
+parsed = urlparse(base)
+if parsed.scheme != 'https' or not parsed.netloc or parsed.username or parsed.query or parsed.fragment:
     raise ValueError('LIVE_URL must use HTTPS')
 
 def request(path, body=None):
@@ -18,7 +25,7 @@ def request(path, body=None):
     with urllib.request.urlopen(req, timeout=30) as response:
         return json.load(response)
 
-deploy = request(f'/services/{service}/deploys',{'commitId':commit,'clearCache':'do_not_clear'})
+deploy = request(f'/services/{service}/deploys',{'imageUrl': image})
 for _ in range(100):
     result = request(f'/services/{service}/deploys/{deploy["id"]}')
     if result['status'] == 'live':
@@ -33,4 +40,4 @@ with urllib.request.urlopen(base+'/api/health',timeout=20) as response:
     assert health == {'status':'ok','storage':'postgresql'},health
 with urllib.request.urlopen(base,timeout=20) as response:
     assert b'id="root"' in response.read()
-print('Verified commit deployed; HTTPS frontend and PostgreSQL health passed')
+print('Verified immutable image deployed; HTTPS frontend and PostgreSQL health passed')

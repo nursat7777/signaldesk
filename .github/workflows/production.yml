@@ -1,0 +1,69 @@
+name: Promote tested image to production
+on:
+  workflow_dispatch:
+    inputs:
+      development_run_id:
+        description: Successful Verify SignalDesk development run ID (also used for rollback)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  deployments: write
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      image: ${{ steps.guard.outputs.image }}
+      sha: ${{ steps.guard.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Download development evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.development_run_id }}
+        run: |
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name development-verified --dir receipt
+      - name: Verify exact digest, provenance and successful development deployment
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEVELOPMENT_RUN_ID: ${{ inputs.development_run_id }}
+        run: python -m scripts.promote_receipt
+  production:
+    needs: validate
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Enforce reviewed migration and backup gate
+        env:
+          MIGRATION_APPROVAL: ${{ vars.MIGRATION_APPROVAL }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          test "$MIGRATION_APPROVAL" = "$SOURCE_SHA" || { echo 'Production operator must verify backup and backward-compatible migrations, then set MIGRATION_APPROVAL to this exact source SHA.'; exit 1; }
+      - name: Deploy the same immutable digest and smoke test
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          LIVE_URL: ${{ vars.LIVE_URL }}
+          DEPLOY_IMAGE: ${{ needs.validate.outputs.image }}
+        run: python -m scripts.deploy_render
+      - name: Deployment history
+        env:
+          IMAGE: ${{ needs.validate.outputs.image }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+        run: |
+          echo "Production image: $IMAGE" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source commit: $SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Migration approval and backup gate passed; HTTPS smoke tests passed.' >> "$GITHUB_STEP_SUMMARY"

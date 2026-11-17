@@ -47,3 +47,12 @@ Health queries the database. See deployment.md for actual verification limits,
 non-root image, persistent network-isolated database, transactional legacy import,
 CI/CD and single-host CloudFormation architecture. SQLite remains a compatibility
 and migration source, not the production Compose database.
+
+## Observability extension — 2026-11-16
+
+Per-app OpenTelemetry SDK providers emit route-template metrics, privacy-filtered
+request/SQL spans and JSON trace-correlated logs to an internal Collector. The
+Compose overlay retains PostgreSQL and adds private monitoring backends and a
+separate read-only incident responder. Development and production use distinct
+project/database/secret scopes. See observability.md for the complete topology
+and operational limits. Application schema and REST responses are unchanged.
