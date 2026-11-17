@@ -61,3 +61,29 @@ Google sign-in succeeded; My Workspace has no services, uses Hobby, and shows
 credit balance$0.00. AWS console returned Site Unavailable; no account credits
 or billing eligibility could be verified. AWS Core was offered but its connection
 is not confirmed. No paid resources were provisioned.
+
+## Follow-up regression — 2026-11-17
+
+Recovered source from authenticated branch ZIP at 8cd55fd. Orchestrator
+self-verification after the #68 daily-form safety fix and report coverage:
+
+- `make verify`: 153 Python tests passed (6 warnings, 13.05s), 37 frontend
+  tests in 9 files passed, TypeScript/Vite production build passed.
+- `npm run e2e`: all 17 Chromium journeys passed in 26.8s against the actual
+  static frontend/FastAPI and disposable SQLite compatibility database.
+- E14 additionally requests the real report endpoint, checks exact persisted
+  spend/revenue/ROAS and daily grouping, rejects an inverted range (422),
+  permits the assigned viewer and rejects cross-client report access (403).
+- CI business metrics verification now runs before the deliberate application
+  restart because SDK counters belong to the application process lifetime.
+  The subsequent restart database/session persistence check remains mandatory.
+- Remote PR run44014999631 exposed a one-second React Testing Library wait
+  expiring while a real HTTP save was still in progress. The HTTP workflow
+  now waits for the loaded edit control and allows up to five seconds for
+  the dialog to close. All persistence/version assertions remain unchanged.
+  Re-run frontend suite: 37 passed in 16.13s.
+
+These local results do not certify PostgreSQL or the latest Compose overlay.
+The latest GitHub Actions result must be inspected before merge. No hosted
+service was created, no secret or billing configuration was changed, and
+no unverified issue was closed.
