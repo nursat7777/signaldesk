@@ -72,15 +72,15 @@ jobs:
         run: .venv/bin/pytest integration -q --junitxml=integration-results.xml
       - name: Playwright all features against actual Compose and PostgreSQL
         run: npm run e2e
+      - name: Run actual observability stack and verify correlated data
+        run: |
+          docker compose exec -T -e ALERT_WEBHOOK_TOKEN -e GRAFANA_ADMIN_PASSWORD app python /app/observability_smoke.py
       - name: Verify actual application restart persistence
         run: |
           .venv/bin/python -m scripts.restart_check prepare
           docker compose restart app
           for i in $(seq 1 30); do curl --fail --silent http://localhost:8000/api/health && break; sleep 2; done
           .venv/bin/python -m scripts.restart_check verify
-      - name: Run actual observability stack and verify correlated data
-        run: |
-          docker compose exec -T -e ALERT_WEBHOOK_TOKEN -e GRAFANA_ADMIN_PASSWORD app python /app/observability_smoke.py
       - name: Preserve the exact tested application image
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
